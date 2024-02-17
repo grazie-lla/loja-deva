@@ -3,6 +3,7 @@ package com.tech.ada.java.lojadeva.controller;
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
 import com.tech.ada.java.lojadeva.repository.ProductRepository;
+import com.tech.ada.java.lojadeva.service.ProductService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,35 +13,33 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@RestController("/product")
+@RestController()
+@RequestMapping("/product")
 public class ProductController {
-
-    private final ProductRepository productRepository;
-    private final ModelMapper modelMapper;
+    private final ProductService productService;
 
     @Autowired
-    public ProductController(ProductRepository productRepository, ModelMapper modelMapper){
-        this.productRepository = productRepository;
-        this.modelMapper = modelMapper;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
-    @PostMapping("/product")
+    @PostMapping
     public ResponseEntity<Product> registerProduct(@RequestBody ProductRequest productRequest) {
-        Product convertedProduct = modelMapper.map(productRequest, Product.class);
-        Product newProduct = productRepository.save(convertedProduct);
+        Product newProduct = productService.registerProduct(productRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
-
     }
 
-    @GetMapping("/product")
-    public List<Product> findAllProducts(){
-        return productRepository.findAll();
+    @GetMapping
+    public List<Product> findAllProducts() {
+        return productService.findAllProducts();
     }
 
-    @GetMapping("product/{id}")
-    public ResponseEntity<Optional<Product>> findProductById(@PathVariable Long id){
-        Optional<Product> product = productRepository.findById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<Product>> findProductById(@PathVariable Long id) {
+        Optional<Product> product = productService.findProductById(id);
         return ResponseEntity.ok().body(product);
     }
+
+
 }
 
