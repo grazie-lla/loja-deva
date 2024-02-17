@@ -2,6 +2,7 @@ package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateProductDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.repository.ProductRepository;
 import org.modelmapper.Conditions;
@@ -43,6 +44,24 @@ public class ProductService {
             Product productFound = productToBeUpdate.get();
 
             updateProductRequest.updateProduct(productFound);
+
+            Product productUpdated = productRepository.save(productFound);
+
+            return ResponseEntity.ok(productUpdated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public ResponseEntity<Product> updateProductDetails(Long id, UpdateProductDetailsRequest updateDetailsRequest){
+        Optional<Product> productToBeModified = findProductById(id);
+
+        if (productToBeModified.isPresent()) {
+            Product productFound = productToBeModified.get();
+
+            if(updateDetailsRequest.description() != null) productFound.setDescription(updateDetailsRequest.description());
+            if(updateDetailsRequest.price() != null) productFound.setPrice(updateDetailsRequest.price());
+            if(updateDetailsRequest.inventoryQuantity() != null) productFound.setInventoryQuantity(updateDetailsRequest.inventoryQuantity());
 
             Product productUpdated = productRepository.save(productFound);
 
