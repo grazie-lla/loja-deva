@@ -17,5 +17,5 @@ public class ProductRequest {
 
     private String category;
 
-    public Product toEntity(){return new Product(name, description, price, inventoryQuantity, category);}
+
 }
