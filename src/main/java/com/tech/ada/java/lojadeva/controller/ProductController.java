@@ -2,6 +2,7 @@ package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateProductDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,12 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest updateProductRequest){
         ResponseEntity<Product> productUpdated = productService.updateProduct(id, updateProductRequest);
         return ResponseEntity.status(productUpdated.getStatusCode()).body(productUpdated.getBody());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Product> updateProductDetails(@PathVariable Long id, @RequestBody UpdateProductDetailsRequest updateDetailsRequest){
+        ResponseEntity<Product> productDetailsUpdated = productService.updateProductDetails(id, updateDetailsRequest);
+        return ResponseEntity.status(productDetailsUpdated.getStatusCode()).body(productDetailsUpdated.getBody());
     }
 
     @DeleteMapping("/{id}")
