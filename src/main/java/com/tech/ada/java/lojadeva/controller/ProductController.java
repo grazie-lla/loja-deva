@@ -2,9 +2,7 @@ package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
-import com.tech.ada.java.lojadeva.repository.ProductRepository;
 import com.tech.ada.java.lojadeva.service.ProductService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
