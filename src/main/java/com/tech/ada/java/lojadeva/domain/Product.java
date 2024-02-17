@@ -28,4 +28,20 @@ public class Product {
     private Integer inventoryQuantity;
 
     private String category;
+
+    public Product(String name,
+                   String description,
+                   BigDecimal price,
+                   Integer inventoryQuantity,
+                   String category) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.inventoryQuantity = inventoryQuantity;
+        this.category = category;
+    }
+
+    public Product() {
+
+    }
 }
