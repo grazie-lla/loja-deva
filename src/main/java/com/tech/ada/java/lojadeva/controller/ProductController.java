@@ -2,6 +2,7 @@ package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,12 @@ public class ProductController {
     public ResponseEntity<Optional<Product>> findProductById(@PathVariable Long id) {
         Optional<Product> product = productService.findProductById(id);
         return ResponseEntity.ok().body(product);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest updateProductRequest){
+        ResponseEntity<Product> productUpdated = productService.updateProduct(id, updateProductRequest);
+        return ResponseEntity.status(productUpdated.getStatusCode()).body(productUpdated.getBody());
     }
 
 
