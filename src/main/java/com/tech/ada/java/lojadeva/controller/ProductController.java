@@ -45,6 +45,11 @@ public class ProductController {
         return ResponseEntity.status(productUpdated.getStatusCode()).body(productUpdated.getBody());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
+        ResponseEntity<String> deletedProduct = productService.deleteProductById(id);
+        return ResponseEntity.status(deletedProduct.getStatusCode()).body(deletedProduct.getBody());
+    }
 
 }
 
