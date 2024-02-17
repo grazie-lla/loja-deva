@@ -2,8 +2,11 @@ package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.repository.ProductRepository;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,5 +33,26 @@ public class ProductService {
 
     public Optional<Product> findProductById(Long id) {
         return productRepository.findById(id);
+    }
+
+    public ResponseEntity<Product> updateProduct(Long id, UpdateProductRequest updateProductRequest){
+
+        Optional<Product> productToBeUpdate = findProductById(id);
+
+        if (productToBeUpdate.isPresent()) {
+            Product productFound = productToBeUpdate.get();
+
+            productFound.setName(updateProductRequest.name());
+            productFound.setDescription(updateProductRequest.description());
+            productFound.setPrice(updateProductRequest.price());
+            productFound.setInventoryQuantity(updateProductRequest.inventoryQuantity());
+            productFound.setCategory(updateProductRequest.category());
+
+            Product productUpdated = productRepository.save(productFound);
+
+            return ResponseEntity.ok(productUpdated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
