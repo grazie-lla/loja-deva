@@ -1,5 +1,7 @@
 package com.tech.ada.java.lojadeva.dto;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
