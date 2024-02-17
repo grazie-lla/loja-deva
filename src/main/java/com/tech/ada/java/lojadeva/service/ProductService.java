@@ -42,15 +42,22 @@ public class ProductService {
         if (productToBeUpdate.isPresent()) {
             Product productFound = productToBeUpdate.get();
 
-            productFound.setName(updateProductRequest.name());
-            productFound.setDescription(updateProductRequest.description());
-            productFound.setPrice(updateProductRequest.price());
-            productFound.setInventoryQuantity(updateProductRequest.inventoryQuantity());
-            productFound.setCategory(updateProductRequest.category());
+            updateProductRequest.updateProduct(productFound);
 
             Product productUpdated = productRepository.save(productFound);
 
             return ResponseEntity.ok(productUpdated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public ResponseEntity<String> deleteProductById(Long id) {
+        Optional<Product> productToDelete = findProductById(id);
+
+        if (productToDelete.isPresent()) {
+            productRepository.deleteById(id);
+            return ResponseEntity.ok("Produto excluído com sucesso.");
         } else {
             return ResponseEntity.notFound().build();
         }
