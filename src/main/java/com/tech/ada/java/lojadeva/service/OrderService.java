@@ -24,4 +24,12 @@ public class OrderService {
         return orderRepository.save(convertedOrder);
     }
 
+    public List<Order> findAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public Optional<Order> findOrderById(Long id) {
+        return orderRepository.findById(id);
+    }
+
 }
