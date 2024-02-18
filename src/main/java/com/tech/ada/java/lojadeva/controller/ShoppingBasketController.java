@@ -20,7 +20,7 @@ public class ShoppingBasketController {
     }
 
     @GetMapping("/shopping-basket")
-    public List<ShoppingBasket> buscarTodos(){
+    public List<ShoppingBasket> findAllBaskets(){
         return shoppingBasketService.findAllBaskets();
     }
 }
