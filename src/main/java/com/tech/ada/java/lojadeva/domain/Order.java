@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -35,14 +36,18 @@ public class Order {
     private LocalDateTime updatedAt;
 
     public Order() {
-
+        this.status = "Pending";
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Order(Long clientId,
                  List<Product> products,
+                 BigDecimal total,
                  String paymentMethod) {
         this.clientId = clientId;
         this.products = products;
+        this.total = total;
         this.paymentMethod = paymentMethod;
         this.status = "Pending";
         this.createdAt = LocalDateTime.now();

@@ -1,8 +1,13 @@
 package com.tech.ada.java.lojadeva.service;
 
+import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -12,6 +17,11 @@ public class OrderService {
     public OrderService(OrderRepository orderRepository, ModelMapper modelMapper) {
         this.orderRepository = orderRepository;
         this.modelMapper = modelMapper;
+    }
+
+    public Order generateOrder(OrderRequest orderRequest) {
+        Order convertedOrder = modelMapper.map(orderRequest, Order.class);
+        return orderRepository.save(convertedOrder);
     }
 
 }
