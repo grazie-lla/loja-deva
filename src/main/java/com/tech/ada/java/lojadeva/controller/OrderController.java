@@ -1,7 +1,9 @@
 package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,12 @@ public class OrderController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody UpdateOrderRequest updateOrderRequest) {
+        ResponseEntity<Order> orderUpdated = orderService.updateOrder(id, updateOrderRequest);
+        return ResponseEntity.status(orderUpdated.getStatusCode()).body(orderUpdated.getBody());
     }
 
     @DeleteMapping("/{id}")
