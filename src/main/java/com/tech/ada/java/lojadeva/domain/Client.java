@@ -48,9 +48,8 @@ public class Client {
             message = "A senha deve conter pelo menos um número, uma letra maiúscula, uma letra minúscula e um caractere especial")
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "carrinho_id", referencedColumnName = "id")
+    private ShoppingBasket shoppingBasket;
 
-    // Ana Luiza
-
-    //@OneToMany(mappedBy = "client")
-    //private List<ShoppingBasket> shoppingBaskets;
 }

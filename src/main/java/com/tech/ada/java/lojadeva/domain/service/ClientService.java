@@ -1,6 +1,7 @@
 package com.tech.ada.java.lojadeva.domain.service;
 
 import com.tech.ada.java.lojadeva.domain.Client;
+import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.domain.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,10 @@ public class ClientService {
     private ClientRepository clientRepository;
 
     public Client registerClient(@Valid Client client) {
-
         validateClient(client);
+
+        ShoppingBasket shoppingBasket = new ShoppingBasket();
+        client.setShoppingBasket(shoppingBasket);
         return clientRepository.save(client);
     }
 
@@ -30,5 +33,10 @@ public class ClientService {
         if (isExistingClient != null) {
             throw new IllegalArgumentException("CPF já cadastrado!");
         }
+    }
+
+    public Client getClientById(Long id) {
+        return clientRepository.findById(id)
+                .orElse(null);
     }
 }
