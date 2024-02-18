@@ -33,13 +33,24 @@ public class ClientController {
         Client updatedClient = clientService.updateClient(id, clientRequest);
         return new ResponseEntity<>(updatedClient, HttpStatus.OK);
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Client> partialUpdateClient(@PathVariable Long id, @Valid @RequestBody ClientRequest clientRequest) {
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
+        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+    }
     @GetMapping("/{id}")
-    public ResponseEntity<ClientResponse> getClientById(@PathVariable Long id) {
+    public ResponseEntity<ClientResponse> getClientById(@PathVariable("id") Long id) {
         Client client = clientService.getClientById(id);
         if (client == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(convertToClientResponse(client));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteClient(@PathVariable("id") Long id) {
+        clientService.deleteClient(id);
+        return ResponseEntity.noContent().build();
     }
 
     private ClientRequest convertToClientRequest(Client client) {

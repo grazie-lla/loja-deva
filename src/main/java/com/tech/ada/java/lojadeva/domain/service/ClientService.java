@@ -19,8 +19,8 @@ public class ClientService {
     public Client registerClient(@Valid Client client) {
         validateClient(client);
 
-       // ShoppingBasket shoppingBasket = new ShoppingBasket();
-       // client.setShoppingBasket(shoppingBasket);
+        // ShoppingBasket shoppingBasket = new ShoppingBasket();
+        // client.setShoppingBasket(shoppingBasket);
         return clientRepository.save(client);
     }
 
@@ -42,6 +42,7 @@ public class ClientService {
 
         return clientRepository.save(existingClient);
     }
+
     private void validateClient(Client client) {
 
         if (!Pattern.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", client.getCpf())) {
@@ -54,8 +55,48 @@ public class ClientService {
         }
     }
 
-    public Client getClientById(Long id) {
-        return clientRepository.findById(id)
-                .orElse(null);
+    public Client partialUpdateClient(Long id, @Valid ClientRequest clientRequest) {
+        Client existingClient = clientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
+
+        if (clientRequest.getName() != null) {
+            existingClient.setName(clientRequest.getName());
+        }
+        if (clientRequest.getEmail() != null) {
+            existingClient.setEmail(clientRequest.getEmail());
+        }
+        if (clientRequest.getCpf() != null) {
+            existingClient.setCpf(clientRequest.getEmail());
+        }
+        if (clientRequest.getAddress() != null) {
+            existingClient.setAddress(clientRequest.getAddress());
+        }
+        if (clientRequest.getPostalCode() != null) {
+            existingClient.setPostalCode(clientRequest.getPostalCode());
+        }
+        if (clientRequest.getPhoneNumber() != null) {
+            existingClient.setPhoneNumber(clientRequest.getPhoneNumber());
+        }
+        if (clientRequest.getPassword() != null) {
+            existingClient.setPassword(clientRequest.getPassword());
+        }
+
+        return clientRepository.save(existingClient);
+
     }
-}
+
+    public Client getClientById(Long id) {
+        return clientRepository.findById(id).orElse(null);
+
+    }
+
+    public void deleteClient(Long id) {
+
+        Client existingClient = clientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+
+        clientRepository.delete(existingClient);
+    }
+    }
+
+
