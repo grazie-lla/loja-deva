@@ -4,6 +4,7 @@ import com.tech.ada.java.lojadeva.domain.Order;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,17 @@ public class OrderService {
 
     public Optional<Order> findOrderById(Long id) {
         return orderRepository.findById(id);
+    }
+
+    public ResponseEntity<String> deleteOrderById(Long id) {
+        Optional<Order> orderToDelete = findOrderById(id);
+
+        if (orderToDelete.isPresent()) {
+            orderRepository.deleteById(id);
+            return ResponseEntity.ok().body("Order successfully deleted");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }
