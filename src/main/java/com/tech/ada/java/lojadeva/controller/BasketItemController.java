@@ -44,8 +44,7 @@ public class BasketItemController {
 
     @PostMapping
     public ResponseEntity<BasketItem> createItem(@RequestBody BasketItemRequest request) {
-        BasketItem basketItem = modelMapper.map(request, BasketItem.class);
-        BasketItem newBasketItem = basketItemService.createItem(basketItem);
+        BasketItem newBasketItem = basketItemService.createItem(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(newBasketItem);
     }
 

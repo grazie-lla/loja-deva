@@ -3,6 +3,7 @@ package com.tech.ada.java.lojadeva.service.impl;
 import com.tech.ada.java.lojadeva.domain.BasketItem;
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
+import com.tech.ada.java.lojadeva.dto.BasketItemRequest;
 import com.tech.ada.java.lojadeva.repository.BasketItemRepository;
 import com.tech.ada.java.lojadeva.service.BasketItemService;
 import com.tech.ada.java.lojadeva.service.ProductService;
@@ -43,7 +44,7 @@ public class BasketItemServiceImpl implements BasketItemService {
     }
 
     @Override
-    public BasketItem createItem(BasketItem item) {
+    public BasketItem createItem(BasketItemRequest item) {
         ShoppingBasket shoppingBasket = shoppingBasketService.findBasketById(item.getShoppingBasketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Carrinho não encontrado"));
 
@@ -54,7 +55,15 @@ public class BasketItemServiceImpl implements BasketItemService {
             throw new IllegalArgumentException("Produto indisponível no estoque.");
         }
 
-        return basketItemRepository.save(item);
+        if (product.getInventoryQuantity() < item.getQuantity()) {
+            throw new IllegalArgumentException("A quantidade desejada é maior que a disponível no estoque. Quantidade disponível: " + product.getInventoryQuantity());
+        }
+
+        BasketItem basketItem = new BasketItem();
+        basketItem.setShoppingBasketId(item.getShoppingBasketId());
+        basketItem.setProductId(item.getProductId());
+        basketItem.setQuantity(item.getQuantity());
+        return basketItemRepository.save(basketItem);
     }
 
     @Override

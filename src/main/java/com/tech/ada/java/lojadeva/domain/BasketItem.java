@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,14 +19,14 @@ public class BasketItem {
     @Column(name = "shopping_basket_id")
     private Long shoppingBasketId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shopping_basket_id", insertable = false, updatable = false)
     private ShoppingBasket shoppingBasket;
 
     @Column(name = "product_id")
     private Long productId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 
