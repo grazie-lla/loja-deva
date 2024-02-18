@@ -26,7 +26,7 @@ public class BasketItemController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping
+    @GetMapping("/items")
     public List<BasketItem> findAllItems(){
         return basketItemService.findAllItems();
     }
@@ -37,7 +37,7 @@ public class BasketItemController {
         return basketItem.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping(params = {"shoppingBasketId"})
+    @GetMapping(value = "/items/by-basket", params = {"shoppingBasketId"})
     public List<BasketItem> findItemsByShoppingBasketId(@RequestParam Long shoppingBasketId){
         return basketItemService.findItemsByShoppingBasketId(shoppingBasketId);
     }
