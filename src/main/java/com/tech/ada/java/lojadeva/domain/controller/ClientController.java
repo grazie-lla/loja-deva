@@ -22,7 +22,7 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<ClientRequest> registerClient(@Valid @RequestBody ClientRequest clientRequest) {
         Client client = convertToClient(clientRequest);
         Client newClient = clientService.registerClient(client);
