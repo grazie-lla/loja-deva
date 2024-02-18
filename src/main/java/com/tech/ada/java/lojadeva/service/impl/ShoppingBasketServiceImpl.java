@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.service.impl;
 
+import com.tech.ada.java.lojadeva.domain.BasketItem;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.repository.ShoppingBasketRepository;
 import com.tech.ada.java.lojadeva.service.ShoppingBasketService;
@@ -26,6 +27,17 @@ public class ShoppingBasketServiceImpl implements ShoppingBasketService {
 
     @Override
     public Optional<ShoppingBasket> findBasketById(Long id) {
+        Optional<ShoppingBasket> basket = shoppingBasketRepository.findById(id);
+        if (basket.isPresent()) {
+            ShoppingBasket shoppingBasket = basket.get();
+            List<BasketItem> items = shoppingBasket.getBasketItems();
+            BigDecimal total = new BigDecimal(0);
+            for (BasketItem item: items) {
+                BigDecimal value = BigDecimal.valueOf(item.getQuantity()).multiply(item.getProduct().getPrice());
+                total = total.add(value);
+            }
+            shoppingBasket.setTotal(total);
+        }
         return shoppingBasketRepository.findById(id);
     }
 

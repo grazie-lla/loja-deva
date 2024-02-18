@@ -23,11 +23,6 @@ public class ShoppingBasketController {
         this.shoppingBasketService = shoppingBasketService;
     }
 
-    @GetMapping
-    public List<ShoppingBasket> findAllBaskets(){
-        return shoppingBasketService.findAllBaskets();
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<ShoppingBasket> findBasketById(@PathVariable Long id){
         Optional<ShoppingBasket> basket = shoppingBasketService.findBasketById(id);
