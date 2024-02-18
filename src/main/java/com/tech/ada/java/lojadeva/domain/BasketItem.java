@@ -15,12 +15,18 @@ public class BasketItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "shopping_cart_id")
-    private ShoppingBasket shoppingBasket;
+    @Column(name = "shopping_basket_id")
+    private Long shoppingBasketId;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "shopping_basket_id", insertable = false, updatable = false)
+    private ShoppingBasket shoppingBasket;
+
+    @Column(name = "product_id")
+    private Long productId;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 
     @Column(name = "quantity")
