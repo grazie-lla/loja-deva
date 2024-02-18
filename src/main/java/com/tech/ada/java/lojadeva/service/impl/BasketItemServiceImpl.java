@@ -5,6 +5,9 @@ import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.repository.BasketItemRepository;
 import com.tech.ada.java.lojadeva.service.BasketItemService;
+import com.tech.ada.java.lojadeva.service.ProductService;
+import com.tech.ada.java.lojadeva.service.ShoppingBasketService;
+import com.tech.ada.java.lojadeva.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +17,14 @@ import java.util.Optional;
 @Service
 public class BasketItemServiceImpl implements BasketItemService {
     private final BasketItemRepository basketItemRepository;
+    private final ShoppingBasketService shoppingBasketService;
+    private final ProductService productService;
 
     @Autowired
-    public BasketItemServiceImpl(BasketItemRepository basketItemRepository) {
+    public BasketItemServiceImpl(BasketItemRepository basketItemRepository, ShoppingBasketService shoppingBasketService, ProductService productService) {
         this.basketItemRepository = basketItemRepository;
+        this.shoppingBasketService = shoppingBasketService;
+        this.productService = productService;
     }
 
     @Override
@@ -37,8 +44,16 @@ public class BasketItemServiceImpl implements BasketItemService {
 
     @Override
     public BasketItem createItem(BasketItem item) {
-        ShoppingBasket shoppingBasket;
-        Product product;
+        ShoppingBasket shoppingBasket = shoppingBasketService.findBasketById(item.getShoppingBasketId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrinho não encontrado"));
+
+        Product product = productService.findProductById(item.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        if (product.getInventoryQuantity() == 0) {
+            throw new IllegalArgumentException("Produto indisponível no estoque.");
+        }
+
         return basketItemRepository.save(item);
     }
 

@@ -25,12 +25,6 @@ public class ShoppingBasket {
     @OneToMany(mappedBy = "shoppingBasket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BasketItem> basketItems;
 
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "postalCode")
-    private String postalCode;
-
     @Column(name = "total")
     private BigDecimal total;
 }
