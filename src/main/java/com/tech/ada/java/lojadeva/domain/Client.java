@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.mapping.List;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Entity
 @Getter
@@ -48,8 +45,8 @@ public class Client {
             message = "A senha deve conter pelo menos um número, uma letra maiúscula, uma letra minúscula e um caractere especial")
     private String password;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "carrinho_id", referencedColumnName = "id")
-    private ShoppingBasket shoppingBasket;
+ //   @OneToOne(cascade = CascadeType.ALL)
+ //   @JoinColumn(name = "carrinho_id", referencedColumnName = "id")
+  //  private ShoppingBasket shoppingBasket;
 
 }

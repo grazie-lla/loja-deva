@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.domain.service;
 
+import com.tech.ada.java.lojadeva.domain.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.domain.repository.ClientRepository;
@@ -18,11 +19,29 @@ public class ClientService {
     public Client registerClient(@Valid Client client) {
         validateClient(client);
 
-        ShoppingBasket shoppingBasket = new ShoppingBasket();
-        client.setShoppingBasket(shoppingBasket);
+       // ShoppingBasket shoppingBasket = new ShoppingBasket();
+       // client.setShoppingBasket(shoppingBasket);
         return clientRepository.save(client);
     }
 
+    public Client updateClient(Long id, @Valid Client clientRequest) {
+        Client existingClient = clientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+
+        if (!existingClient.getCpf().equals(clientRequest.getCpf())) {
+            validateClient(clientRequest);
+        }
+
+        existingClient.setName(clientRequest.getName());
+        existingClient.setEmail(clientRequest.getEmail());
+        existingClient.setCpf(clientRequest.getCpf());
+        existingClient.setAddress(clientRequest.getAddress());
+        existingClient.setPostalCode(clientRequest.getPostalCode());
+        existingClient.setPhoneNumber(clientRequest.getPhoneNumber());
+        existingClient.setPassword(clientRequest.getPassword());
+
+        return clientRepository.save(existingClient);
+    }
     private void validateClient(Client client) {
 
         if (!Pattern.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", client.getCpf())) {
