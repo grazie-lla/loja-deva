@@ -6,6 +6,7 @@ import com.tech.ada.java.lojadeva.service.ShoppingBasketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,5 +27,11 @@ public class ShoppingBasketServiceImpl implements ShoppingBasketService {
     @Override
     public Optional<ShoppingBasket> findBasketById(Long id) {
         return shoppingBasketRepository.findById(id);
+    }
+
+    @Override
+    public ShoppingBasket createShoppingBasket(ShoppingBasket shoppingBasket) {
+        shoppingBasket.setTotal(new BigDecimal(0));
+        return shoppingBasketRepository.save(shoppingBasket);
     }
 }

@@ -1,37 +1,42 @@
 package com.tech.ada.java.lojadeva.controller;
 
+import com.tech.ada.java.lojadeva.domain.BasketItem;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
-import com.tech.ada.java.lojadeva.repository.ShoppingBasketRepository;
 import com.tech.ada.java.lojadeva.service.ShoppingBasketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
-@RestController("/shopping-basket")
+@RestController
+@RequestMapping("/shopping-basket")
 public class ShoppingBasketController {
 
     private final ShoppingBasketService shoppingBasketService;
-    private final ShoppingBasketRepository shoppingBasketRepository;
 
     @Autowired
-    public ShoppingBasketController(ShoppingBasketService shoppingBasketService, ShoppingBasketRepository shoppingBasketRepository) {
+    public ShoppingBasketController(ShoppingBasketService shoppingBasketService) {
         this.shoppingBasketService = shoppingBasketService;
-        this.shoppingBasketRepository = shoppingBasketRepository;
     }
 
-    @GetMapping("/shopping-basket")
+    @GetMapping
     public List<ShoppingBasket> findAllBaskets(){
         return shoppingBasketService.findAllBaskets();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ShoppingBasket> findIBasketById(@PathVariable Long id){
+        Optional<ShoppingBasket> basket = shoppingBasketService.findBasketById(id);
+        return basket.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<ShoppingBasket> createShoppingBasket() {
-        ShoppingBasket newBasket = shoppingBasketRepository.save(new ShoppingBasket());
+        ShoppingBasket newBasket = shoppingBasketService.createShoppingBasket(new ShoppingBasket());
         return ResponseEntity.status(HttpStatus.CREATED).body(newBasket);
     }
 }

@@ -9,4 +9,6 @@ public interface ShoppingBasketService {
     List<ShoppingBasket> findAllBaskets();
 
     Optional<ShoppingBasket> findBasketById(Long id);
+
+    ShoppingBasket createShoppingBasket(ShoppingBasket shoppingBasket);
 }
