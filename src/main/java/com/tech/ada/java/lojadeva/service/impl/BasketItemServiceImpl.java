@@ -1,6 +1,8 @@
 package com.tech.ada.java.lojadeva.service.impl;
 
 import com.tech.ada.java.lojadeva.domain.BasketItem;
+import com.tech.ada.java.lojadeva.domain.Product;
+import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.repository.BasketItemRepository;
 import com.tech.ada.java.lojadeva.service.BasketItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,8 @@ public class BasketItemServiceImpl implements BasketItemService {
 
     @Override
     public BasketItem createItem(BasketItem item) {
+        ShoppingBasket shoppingBasket;
+        Product product;
         return basketItemRepository.save(item);
     }
 
