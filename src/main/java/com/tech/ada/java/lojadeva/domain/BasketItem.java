@@ -15,19 +15,14 @@ public class BasketItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "shopping_basket_id")
-    private Long shoppingBasketId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "shopping_basket_id", insertable = false, updatable = false)
+    
+    @ManyToOne
+    @JoinColumn(name = "shopping_basket_id")
+    @JsonIgnore
     private ShoppingBasket shoppingBasket;
 
-    @Column(name = "product_id")
-    private Long productId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(name = "quantity")

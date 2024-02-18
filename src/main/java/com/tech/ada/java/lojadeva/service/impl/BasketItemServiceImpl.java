@@ -60,8 +60,8 @@ public class BasketItemServiceImpl implements BasketItemService {
         }
 
         BasketItem basketItem = new BasketItem();
-        basketItem.setShoppingBasketId(item.getShoppingBasketId());
-        basketItem.setProductId(item.getProductId());
+        basketItem.setShoppingBasket(shoppingBasket);
+        basketItem.setProduct(product);
         basketItem.setQuantity(item.getQuantity());
         return basketItemRepository.save(basketItem);
     }
