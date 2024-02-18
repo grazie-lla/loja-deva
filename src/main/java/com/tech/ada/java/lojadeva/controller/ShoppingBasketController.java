@@ -29,7 +29,7 @@ public class ShoppingBasketController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ShoppingBasket> findIBasketById(@PathVariable Long id){
+    public ResponseEntity<ShoppingBasket> findBasketById(@PathVariable Long id){
         Optional<ShoppingBasket> basket = shoppingBasketService.findBasketById(id);
         return basket.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
