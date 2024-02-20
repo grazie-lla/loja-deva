@@ -27,16 +27,16 @@ public class Order {
 
     private BigDecimal total;
 
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
-    private String status;
+    private Status status;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
     public Order() {
-        this.status = "Pending";
+        this.status = Status.PENDING;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -44,12 +44,12 @@ public class Order {
     public Order(Long clientId,
                  List<Product> products,
                  BigDecimal total,
-                 String paymentMethod) {
+                 PaymentMethod paymentMethod) {
         this.clientId = clientId;
         this.products = products;
         this.total = total;
         this.paymentMethod = paymentMethod;
-        this.status = "Pending";
+        this.status = Status.PENDING;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

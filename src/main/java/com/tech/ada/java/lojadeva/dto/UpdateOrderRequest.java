@@ -1,7 +1,9 @@
 package com.tech.ada.java.lojadeva.dto;
 
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.domain.PaymentMethod;
 import com.tech.ada.java.lojadeva.domain.Product;
+import com.tech.ada.java.lojadeva.domain.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,16 +14,16 @@ public record UpdateOrderRequest (
         Long clientId,
         List<Product> products,
         BigDecimal total,
-        String paymentMethod,
-        String status
+        PaymentMethod paymentMethod,
+        Status status
 
 ) {
 
     public UpdateOrderRequest(Long clientId,
                               List<Product> products,
                               BigDecimal total,
-                              String paymentMethod,
-                              String status) {
+                              PaymentMethod paymentMethod,
+                              Status status) {
         this.clientId = Objects.requireNonNull(clientId, "Client id is mandatory.");
         //this.products = Objects.requireNonNull(products, "Products list is mandatory.");
         this.products = products;
