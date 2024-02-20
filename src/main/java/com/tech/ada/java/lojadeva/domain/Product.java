@@ -1,13 +1,11 @@
 package com.tech.ada.java.lojadeva.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Entity
 @Getter
@@ -27,10 +25,6 @@ public class Product {
     private Integer inventoryQuantity;
 
     private String category;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<BasketItem> basketItems;
 
     public Product(String name,
                    String description,
