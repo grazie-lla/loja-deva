@@ -1,13 +1,19 @@
 package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.domain.PaymentMethod;
+import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateOrderDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,13 +40,19 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    public List<Order> findOrdersByClientId(Long clientId) {
+        return orderRepository.findOrderByClientId(clientId);
+    }
+
     public ResponseEntity<Order> updateOrder(Long id, UpdateOrderRequest updateOrderRequest) {
         Optional<Order> orderToBeUpdated = findOrderById(id);
 
         if (orderToBeUpdated.isPresent()) {
             Order orderFound = orderToBeUpdated.get();
+
             updateOrderRequest.update(orderFound);
             Order orderUpdated = orderRepository.save(orderFound);
+
             return ResponseEntity.ok().body(orderUpdated);
         } else {
             return ResponseEntity.notFound().build();

@@ -1,8 +1,8 @@
 package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Order;
-import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateOrderDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +43,11 @@ public class OrderController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping(params = {"clientId"})
+    public List<Order> findOrdersByClientId(@RequestParam Long clientId) {
+        return orderService.findOrdersByClientId(clientId);
     }
 
     @PutMapping("/{id}")
