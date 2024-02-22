@@ -54,4 +54,8 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public boolean isUpdatable() {
+        return !this.getStatus().equals(Status.CANCELADO) && !this.getStatus().equals(Status.ENTREGUE);
+    }
+
 }

@@ -18,6 +18,9 @@ public record UpdateOrderRequest (String status) {
     }
 
     public void update(Order order) {
+        if (!order.isUpdatable()) {
+            throw new IllegalArgumentException("Não é possível alterar o pedido.");
+        }
         order.setStatus(Status.valueOf(this.status));
     }
 
