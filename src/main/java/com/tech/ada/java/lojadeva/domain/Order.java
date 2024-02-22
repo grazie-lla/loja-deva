@@ -22,7 +22,7 @@ public class Order {
 
     private Long clientId;
 
-    @OneToMany
+    @ManyToMany
     private List<Product> products;
 
     private BigDecimal total;

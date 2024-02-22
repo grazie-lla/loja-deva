@@ -2,7 +2,6 @@ package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Order;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
-import com.tech.ada.java.lojadeva.dto.UpdateOrderDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +57,12 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteOrderById(@PathVariable Long id) {
-        ResponseEntity<String> deletedOrder = orderService.deleteOrderById(id);
-        return ResponseEntity.status(deletedOrder.getStatusCode()).body(deletedOrder.getBody());
+        Boolean isOrderDeleted = orderService.deleteOrderById(id);
+        if (isOrderDeleted) {
+            return ResponseEntity.ok("Order successfully deleted.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

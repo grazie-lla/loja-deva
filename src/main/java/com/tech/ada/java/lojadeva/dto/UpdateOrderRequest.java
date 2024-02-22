@@ -7,37 +7,30 @@ import com.tech.ada.java.lojadeva.domain.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public record UpdateOrderRequest (
-        Long clientId,
-        List<Product> products,
-        BigDecimal total,
-        PaymentMethod paymentMethod,
-        Status status
-
+        String status
 ) {
 
-    public UpdateOrderRequest(Long clientId,
-                              List<Product> products,
-                              BigDecimal total,
-                              PaymentMethod paymentMethod,
-                              Status status) {
-        this.clientId = Objects.requireNonNull(clientId, "Client id is mandatory.");
-        //this.products = Objects.requireNonNull(products, "Products list is mandatory.");
-        this.products = products;
-        this.total = Objects.requireNonNull(total, "Order total is mandatory.");
-        this.paymentMethod = Objects.requireNonNull(paymentMethod, "Payment method is mandatory.");
+    public UpdateOrderRequest(String status) {
+
         this.status = Objects.requireNonNull(status, "Order status is mandatory.");
+        if (!isValidStatus(status)) {
+            throw new IllegalArgumentException("Invalid order status.");
+        }
+
     }
 
     public void update(Order order) {
-        order.setClientId(this.clientId);
-        order.setProducts(this.products);
-        order.setTotal(this.total);
-        order.setPaymentMethod(this.paymentMethod);
-        order.setStatus(this.status);
-        order.setUpdatedAt(LocalDateTime.now());
+        order.setStatus(Status.valueOf(this.status));
     }
+
+    public boolean isValidStatus(String status) {
+        return Arrays.stream(Status.values())
+                .anyMatch(enumValue -> enumValue.name().equalsIgnoreCase(status));
+    }
+
 }
