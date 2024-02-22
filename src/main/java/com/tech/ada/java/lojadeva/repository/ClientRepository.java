@@ -1,4 +1,4 @@
-package com.tech.ada.java.lojadeva.domain.repository;
+package com.tech.ada.java.lojadeva.repository;
 
 import com.tech.ada.java.lojadeva.domain.Client;
 import org.springframework.data.jpa.repository.JpaRepository;

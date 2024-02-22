@@ -1,4 +1,4 @@
-package com.tech.ada.java.lojadeva.domain.dto;
+package com.tech.ada.java.lojadeva.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +14,5 @@ public class ClientResponse {
     private String address;
     private String postalCode;
     private String phoneNumber;
-    private String password;
+
 }

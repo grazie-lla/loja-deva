@@ -1,4 +1,4 @@
-package com.tech.ada.java.lojadeva.domain.dto;
+package com.tech.ada.java.lojadeva.dto;
 
 
 import lombok.AllArgsConstructor;
