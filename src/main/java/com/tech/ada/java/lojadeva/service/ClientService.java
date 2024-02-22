@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.service;
 
+import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
 import com.tech.ada.java.lojadeva.repository.ClientRepository;
@@ -18,8 +19,9 @@ public class ClientService {
     public Client registerClient(@Valid Client client) {
         validateClient(client);
 
-        // ShoppingBasket shoppingBasket = new ShoppingBasket();
-        // client.setShoppingBasket(shoppingBasket);
+        ShoppingBasket shoppingBasket = new ShoppingBasket();
+        client.setShoppingBasket(shoppingBasket);
+        shoppingBasket.setClient(client);
         return clientRepository.save(client);
     }
 

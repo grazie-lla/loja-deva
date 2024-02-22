@@ -46,8 +46,8 @@ public class Client {
     private String password;
     
 
- //   @OneToOne(cascade = CascadeType.ALL)
- //   @JoinColumn(name = "carrinho_id", referencedColumnName = "id")
-  //  private ShoppingBasket shoppingBasket;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "carrinho_id", referencedColumnName = "id")
+    private ShoppingBasket shoppingBasket;
 
 }
