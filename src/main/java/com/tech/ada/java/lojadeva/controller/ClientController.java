@@ -74,7 +74,7 @@ public class ClientController {
         clientResponse.setAddress(client.getAddress());
         clientResponse.setPostalCode(client.getPostalCode());
         clientResponse.setPhoneNumber(client.getPhoneNumber());
-        clientResponse.setPassword(clientResponse.getPassword());
+//        clientResponse.setPassword(clientResponse.getPassword());
 
         return clientResponse;
     }
