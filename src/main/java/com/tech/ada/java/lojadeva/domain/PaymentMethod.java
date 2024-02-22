@@ -1,8 +1,8 @@
 package com.tech.ada.java.lojadeva.domain;
 
 public enum PaymentMethod {
-    CREDIT_CARD,
-    BANK_SLIP,
+    CARTAO_CREDITO,
+    BOLETO,
     PAYPAL,
     PIX
 }

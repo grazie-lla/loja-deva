@@ -22,21 +22,21 @@ public class OrderRequest {
                         BigDecimal total,
                         String paymentMethod) {
 
-        this.clientId = Objects.requireNonNull(clientId, "Client id is mandatory.");
+        this.clientId = Objects.requireNonNull(clientId, "O id do cliente é obrigatório.");
 
-        this.products = Objects.requireNonNull(products, "Products list is mandatory.");
+        this.products = Objects.requireNonNull(products, "A lista de produtos é obrigatória.");
         if (products.isEmpty()) {
-            throw new IllegalArgumentException("Products list must not be empty.");
+            throw new IllegalArgumentException("A lista de produtos não pode estar vazia.");
         }
 
-        this.total = Objects.requireNonNull(total, "Order total is mandatory.");
+        this.total = Objects.requireNonNull(total, "O valor total do pedido é obrigatório.");
         if (total.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Order total must not be negative.");
+            throw new IllegalArgumentException("O valor total do pedido não pode ser negativo.");
         }
 
-        this.paymentMethod = Objects.requireNonNull(paymentMethod, "Payment method is mandatory.");
+        this.paymentMethod = Objects.requireNonNull(paymentMethod, "O método de pagamento é obrigatório.");
         if (!isValidPaymentMethod(paymentMethod)) {
-            throw new IllegalArgumentException("Invalid payment method.");
+            throw new IllegalArgumentException("Método de pagamento inválido.");
         }
 
     }

@@ -36,7 +36,7 @@ public class Order {
     private LocalDateTime updatedAt;
 
     public Order() {
-        this.status = Status.PENDING;
+        this.status = Status.PENDENTE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -49,7 +49,7 @@ public class Order {
         this.products = products;
         this.total = total;
         this.paymentMethod = paymentMethod;
-        this.status = Status.PENDING;
+        this.status = Status.PENDENTE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

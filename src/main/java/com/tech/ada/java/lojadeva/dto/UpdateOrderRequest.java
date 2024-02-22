@@ -1,25 +1,18 @@
 package com.tech.ada.java.lojadeva.dto;
 
 import com.tech.ada.java.lojadeva.domain.Order;
-import com.tech.ada.java.lojadeva.domain.PaymentMethod;
-import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.Status;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
-public record UpdateOrderRequest (
-        String status
-) {
+public record UpdateOrderRequest (String status) {
 
     public UpdateOrderRequest(String status) {
 
-        this.status = Objects.requireNonNull(status, "Order status is mandatory.");
+        this.status = Objects.requireNonNull(status, "O status do pedido é obrigatório.");
         if (!isValidStatus(status)) {
-            throw new IllegalArgumentException("Invalid order status.");
+            throw new IllegalArgumentException("Status do pedido inválido.");
         }
 
     }

@@ -59,7 +59,7 @@ public class OrderController {
     public ResponseEntity<String> deleteOrderById(@PathVariable Long id) {
         Boolean isOrderDeleted = orderService.deleteOrderById(id);
         if (isOrderDeleted) {
-            return ResponseEntity.ok("Order successfully deleted.");
+            return ResponseEntity.ok("Pedido excluído com sucesso.");
         } else {
             return ResponseEntity.notFound().build();
         }
