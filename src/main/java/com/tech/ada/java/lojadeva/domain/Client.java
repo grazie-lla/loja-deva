@@ -44,6 +44,7 @@ public class Client {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$",
             message = "A senha deve conter pelo menos um número, uma letra maiúscula, uma letra minúscula e um caractere especial")
     private String password;
+    
 
  //   @OneToOne(cascade = CascadeType.ALL)
  //   @JoinColumn(name = "carrinho_id", referencedColumnName = "id")

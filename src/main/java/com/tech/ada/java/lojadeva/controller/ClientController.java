@@ -1,9 +1,9 @@
-package com.tech.ada.java.lojadeva.domain.controller;
+package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Client;
-import com.tech.ada.java.lojadeva.domain.dto.ClientRequest;
-import com.tech.ada.java.lojadeva.domain.dto.ClientResponse;
-import com.tech.ada.java.lojadeva.domain.service.ClientService;
+import com.tech.ada.java.lojadeva.dto.ClientRequest;
+import com.tech.ada.java.lojadeva.dto.ClientResponse;
+import com.tech.ada.java.lojadeva.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

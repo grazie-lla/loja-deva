@@ -1,9 +1,8 @@
-package com.tech.ada.java.lojadeva.domain.service;
+package com.tech.ada.java.lojadeva.service;
 
-import com.tech.ada.java.lojadeva.domain.dto.ClientRequest;
+import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
-import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
-import com.tech.ada.java.lojadeva.domain.repository.ClientRepository;
+import com.tech.ada.java.lojadeva.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
