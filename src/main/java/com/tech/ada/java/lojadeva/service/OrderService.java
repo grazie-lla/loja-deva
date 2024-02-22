@@ -1,6 +1,7 @@
 package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
@@ -14,15 +15,18 @@ import java.util.Optional;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
+    //private final ShoppingBasketService shoppingBasketService;
     private final ModelMapper modelMapper;
 
     public OrderService(OrderRepository orderRepository, ModelMapper modelMapper) {
         this.orderRepository = orderRepository;
+        //this.shoppingBasketService = shoppingBasketService;
         this.modelMapper = modelMapper;
     }
 
     public Order generateOrder(OrderRequest orderRequest) {
-        Order convertedOrder = modelMapper.map(orderRequest, Order.class);
+        //Order convertedOrder = modelMapper.map(orderRequest, Order.class);
+        Order convertedOrder = orderRequest.toEntity();
         return orderRepository.save(convertedOrder);
     }
 

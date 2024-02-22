@@ -22,8 +22,8 @@ public class Order {
 
     private Long clientId;
 
-    @ManyToMany
-    private List<Product> products;
+    @OneToMany
+    private List<OrderItem> orderItems;
 
     private BigDecimal total;
 
@@ -42,11 +42,11 @@ public class Order {
     }
 
     public Order(Long clientId,
-                 List<Product> products,
+                 List<OrderItem> orderItems,
                  BigDecimal total,
                  PaymentMethod paymentMethod) {
         this.clientId = clientId;
-        this.products = products;
+        this.orderItems = orderItems;
         this.total = total;
         this.paymentMethod = paymentMethod;
         this.status = Status.PENDENTE;
