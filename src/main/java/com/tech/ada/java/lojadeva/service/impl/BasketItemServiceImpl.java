@@ -9,6 +9,7 @@ import com.tech.ada.java.lojadeva.service.BasketItemService;
 import com.tech.ada.java.lojadeva.service.ProductService;
 import com.tech.ada.java.lojadeva.service.ShoppingBasketService;
 import com.tech.ada.java.lojadeva.service.exceptions.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,8 +69,9 @@ public class BasketItemServiceImpl implements BasketItemService {
 
     @Override
     public Boolean deleteItem(Long id) {
-        if (basketItemRepository.findById(id).isPresent()) {
-            basketItemRepository.deleteById(id);
+        Optional<BasketItem> item = basketItemRepository.findById(id);
+        if (item.isPresent()) {
+            basketItemRepository.deleteBasketItemById(id);
             return true;
         } else {
             return false;
