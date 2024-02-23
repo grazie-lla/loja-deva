@@ -32,20 +32,14 @@ public class OrderItem {
 
     private Integer quantity;
 
-    public OrderItem(Product product, Integer quantity) {
-
+    public OrderItem(Order order, Product product, Integer quantity) {
+        this.order = order;
+        this.product = product;
+        this.quantity = quantity;
     }
 
-    public static List<OrderItem> toOrderItems(List<BasketItem> basketItems) {
-
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        for (BasketItem basketItem : basketItems) {
-            OrderItem orderItem = new OrderItem(basketItem.getProduct(),basketItem.getQuantity());
-            orderItems.add(orderItem);
-        }
-
-        return orderItems;
+    public static OrderItem fromBasketItemToOrderItem(Order order, BasketItem basketItem) {
+        return new OrderItem(order, basketItem.getProduct(), basketItem.getQuantity());
     }
 
 }

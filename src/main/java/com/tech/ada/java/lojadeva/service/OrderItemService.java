@@ -35,21 +35,15 @@ public class OrderItemService {
         }
 
         for (BasketItem basketItem : basketItems) {
-            Product product = basketItem.getProduct();
-            Integer quantity = basketItem.getQuantity();
-
-            if (!isProductQuantityAvailable(product, quantity)) {
-                throw new IllegalArgumentException("A quantidade do produto não está disponível.");
+            if (!isProductQuantityAvailable(basketItem.getProduct(), basketItem.getQuantity())) {
+                throw new IllegalArgumentException("A quantidade desejada não está disponível no estoque.");
             }
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(product);
-            orderItem.setQuantity(quantity);
-
+            OrderItem orderItem = OrderItem.fromBasketItemToOrderItem(order, basketItem);
             orderItemRepository.save(orderItem);
-            removeProductQuantityFromInventory(product, quantity);
+            removeProductQuantityFromInventory(orderItem.getProduct(), orderItem.getQuantity());
         }
+
         return orderItemRepository.findByOrderId(order.getId());
     }
 
