@@ -22,7 +22,7 @@ public class Order {
 
     private Long clientId;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 
     private BigDecimal total;
