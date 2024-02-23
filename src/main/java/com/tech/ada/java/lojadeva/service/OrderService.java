@@ -4,10 +4,12 @@ import com.tech.ada.java.lojadeva.domain.*;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,13 +31,13 @@ public class OrderService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     public Order generateOrder(OrderRequest orderRequest) {
         ShoppingBasket basket = shoppingBasketService
                 .findBasketById(orderRequest.getBasketId())
                 .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado."));
 
         Order order = new Order();
-        // Todo: find better way to do this instead of saving partially empty order
         orderRepository.save(order);
 
         List<OrderItem> orderItems = orderItemService.createOrderItemsFromBasketItems(order, basket.getBasketItems());

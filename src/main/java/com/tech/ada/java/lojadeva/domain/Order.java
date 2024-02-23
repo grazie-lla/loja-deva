@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -54,6 +55,7 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
+    @JsonIgnore
     public boolean isUpdatable() {
         return !this.getStatus().equals(Status.CANCELADO) && !this.getStatus().equals(Status.ENTREGUE);
     }

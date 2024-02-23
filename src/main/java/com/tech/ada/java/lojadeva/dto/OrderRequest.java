@@ -1,13 +1,15 @@
 package com.tech.ada.java.lojadeva.dto;
 
 import com.tech.ada.java.lojadeva.domain.*;
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 public class OrderRequest {
 
     @NotNull(message = "O id do carrinho é obrigatório.")
