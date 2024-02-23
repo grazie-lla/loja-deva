@@ -3,42 +3,24 @@ package com.tech.ada.java.lojadeva.dto;
 import com.tech.ada.java.lojadeva.domain.*;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Arrays;
-import java.util.Objects;
 
 @Data
 public class OrderRequest {
 
-    private Long shoppingBasketId;
+    @NotNull(message = "O id do carrinho é obrigatório.")
+    @NotBlank(message = "O id do carrinho é obrigatório.")
+    private Long basketId;
+
+    @NotNull(message = "O método de pagamento é obrigatório.")
+    @NotBlank(message = "O método de pagamento é obrigatório.")
     private String paymentMethod;
 
-    public OrderRequest(Long shoppingBasketId, String paymentMethod) {
-
-        this.shoppingBasketId = shoppingBasketId;
-
-        this.paymentMethod = Objects.requireNonNull(paymentMethod, "O método de pagamento é obrigatório.");
-        if (!isValidPaymentMethod(paymentMethod)) {
-            throw new IllegalArgumentException("Método de pagamento inválido.");
-        }
-
-    }
-
-    private boolean isValidPaymentMethod(String paymentMethod) {
-        return Arrays.stream(PaymentMethod.values())
-                .anyMatch(enumValue -> enumValue.name().equalsIgnoreCase(paymentMethod));
-    }
-
-    public Order toEntity() {
-
-        //ShoppingBasket basket = e
-        Order order = new Order();
-
-        /*order.setClientId(basket.getClient().getId());
-        order.setOrderItems(OrderItem.toOrderItems(basket.getBasketItems()));
-        order.setTotal(basket.getTotal());
-        order.setPaymentMethod(PaymentMethod.valueOf(paymentMethod));*/
-
-        return order;
+    public OrderRequest(Long basketId, String paymentMethod) {
+        this.basketId = basketId;
+        this.paymentMethod = paymentMethod;
     }
 
 }
