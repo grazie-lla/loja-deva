@@ -38,7 +38,7 @@ public class ShoppingBasketServiceImpl implements ShoppingBasketService {
             }
             shoppingBasket.setTotal(total);
         }
-        return shoppingBasketRepository.findById(id);
+        return basket;
     }
 
     @Override
