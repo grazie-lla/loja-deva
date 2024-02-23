@@ -4,6 +4,7 @@ import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
 import com.tech.ada.java.lojadeva.repository.ClientRepository;
+import com.tech.ada.java.lojadeva.repository.ShoppingBasketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,15 +14,23 @@ import java.util.regex.Pattern;
 @Service
 public class ClientService {
 
+    private final ClientRepository clientRepository;
+    private final ShoppingBasketService shoppingBasketService;
+
     @Autowired
-    private ClientRepository clientRepository;
+    public ClientService(ClientRepository clientRepository, ShoppingBasketService shoppingBasketService) {
+        this.clientRepository = clientRepository;
+        this.shoppingBasketService = shoppingBasketService;
+    }
 
     public Client registerClient(@Valid Client client) {
         validateClient(client);
 
         ShoppingBasket shoppingBasket = new ShoppingBasket();
-        client.setShoppingBasket(shoppingBasket);
         shoppingBasket.setClient(client);
+        ShoppingBasket savedShoppingBasket = shoppingBasketService.createShoppingBasket(shoppingBasket);
+
+        client.setShoppingBasket(savedShoppingBasket);
         return clientRepository.save(client);
     }
 
