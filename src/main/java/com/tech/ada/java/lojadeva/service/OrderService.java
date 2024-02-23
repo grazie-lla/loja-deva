@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -17,17 +18,21 @@ import java.util.Optional;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ShoppingBasketService shoppingBasketService;
     private final OrderItemService orderItemService;
+    private final ShoppingBasketService shoppingBasketService;
+    private final BasketItemService basketItemService;
+
     private final ModelMapper modelMapper;
 
     public OrderService(OrderRepository orderRepository,
-                        ShoppingBasketService shoppingBasketService,
                         OrderItemService orderItemService,
+                        ShoppingBasketService shoppingBasketService,
+                        BasketItemService basketItemService,
                         ModelMapper modelMapper) {
         this.orderRepository = orderRepository;
-        this.shoppingBasketService = shoppingBasketService;
         this.orderItemService = orderItemService;
+        this.shoppingBasketService = shoppingBasketService;
+        this.basketItemService = basketItemService;
         this.modelMapper = modelMapper;
     }
 
@@ -47,6 +52,8 @@ public class OrderService {
         order.setTotal(basket.getTotal());
         validatePaymentMethod(orderRequest.getPaymentMethod());
         order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
+
+        emptyShoppingBasket(basket);
 
         return orderRepository.save(order);
     }
@@ -82,7 +89,7 @@ public class OrderService {
         Optional<Order> orderToDelete = findOrderById(id);
 
         if (orderToDelete.isPresent()) {
-            orderRepository.deleteById(id);
+            orderRepository.delete(orderToDelete.get());
             return true;
         } else {
             return false;
@@ -96,6 +103,13 @@ public class OrderService {
         if(!isValid) {
             throw new IllegalArgumentException("Método de pagamento inválido");
         }
+    }
+
+    private void emptyShoppingBasket(ShoppingBasket basket) {
+        for (BasketItem item : basket.getBasketItems()) {
+            basketItemService.deleteItem(item.getId());
+        }
+        basket.setTotal(new BigDecimal(0));
     }
 
 }
