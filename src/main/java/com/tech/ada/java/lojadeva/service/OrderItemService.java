@@ -31,7 +31,7 @@ public class OrderItemService {
 
     public List<OrderItem> createOrderItemsFromBasketItems(Order order, List<BasketItem> basketItems) {
         if (basketItems.isEmpty()) {
-            throw new IllegalArgumentException("A lista de itens está vazia.");
+            throw new IllegalArgumentException("O carrinho está vazio.");
         }
 
         for (BasketItem basketItem : basketItems) {
@@ -48,25 +48,37 @@ public class OrderItemService {
             orderItem.setQuantity(quantity);
 
             orderItemRepository.save(orderItem);
-            updateProductInventory(product, quantity);
+            removeProductQuantityFromInventory(product, quantity);
         }
         return orderItemRepository.findByOrderId(order.getId());
+    }
+
+    public void returnOrderItemsToInventory(List<OrderItem> orderItems) {
+        for (OrderItem orderItem : orderItems) {
+            returnProductQuantityToInventory(orderItem.getProduct(),orderItem.getQuantity());
+        }
     }
 
     public boolean isProductQuantityAvailable(Product product, Integer quantity) {
         return quantity <= product.getInventoryQuantity();
     }
 
-    public void updateProductInventory(Product product, Integer quantity) {
-        Integer inventoryQuantityBefore = product.getInventoryQuantity();
-        Integer inventoryQuantityAfter = inventoryQuantityBefore - quantity;
+    public void removeProductQuantityFromInventory(Product product, Integer quantity) {
+        Integer inventoryQuantityAfter = product.getInventoryQuantity() - quantity;
 
         UpdateProductDetailsRequest request =
                 new UpdateProductDetailsRequest(null, null, inventoryQuantityAfter);
 
         productService.updateProductDetails(product.getId(), request);
     }
-    
-    // Todo: return items to repository when order is cancelled
+
+    public void returnProductQuantityToInventory(Product product, Integer quantity) {
+        Integer inventoryQuantityAfter = product.getInventoryQuantity() + quantity;
+
+        UpdateProductDetailsRequest request =
+                new UpdateProductDetailsRequest(null, null, inventoryQuantityAfter);
+
+        productService.updateProductDetails(product.getId(), request);
+    }
 
 }

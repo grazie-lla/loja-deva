@@ -75,9 +75,12 @@ public class OrderService {
 
         if (orderToBeUpdated.isPresent()) {
             Order orderFound = orderToBeUpdated.get();
-
             updateOrderRequest.update(orderFound);
             Order orderUpdated = orderRepository.save(orderFound);
+
+            if (isOrderCancelled(orderUpdated)) {
+                orderItemService.returnOrderItemsToInventory(orderUpdated.getOrderItems());
+            }
 
             return ResponseEntity.ok().body(orderUpdated);
         } else {
@@ -110,6 +113,10 @@ public class OrderService {
             basketItemService.deleteItem(item.getId());
         }
         basket.setTotal(new BigDecimal(0));
+    }
+
+    private boolean isOrderCancelled(Order order) {
+        return order.getStatus().equals(Status.CANCELADO);
     }
 
 }
