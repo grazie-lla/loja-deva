@@ -5,11 +5,9 @@ import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -22,18 +20,14 @@ public class OrderService {
     private final ShoppingBasketService shoppingBasketService;
     private final BasketItemService basketItemService;
 
-    private final ModelMapper modelMapper;
-
     public OrderService(OrderRepository orderRepository,
                         OrderItemService orderItemService,
                         ShoppingBasketService shoppingBasketService,
-                        BasketItemService basketItemService,
-                        ModelMapper modelMapper) {
+                        BasketItemService basketItemService) {
         this.orderRepository = orderRepository;
         this.orderItemService = orderItemService;
         this.shoppingBasketService = shoppingBasketService;
         this.basketItemService = basketItemService;
-        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -41,6 +35,10 @@ public class OrderService {
         ShoppingBasket basket = shoppingBasketService
                 .findBasketById(orderRequest.getBasketId())
                 .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado."));
+
+        if(!isValidPaymentMethod(orderRequest.getPaymentMethod())) {
+            throw new IllegalArgumentException("Método de pagamento inválido");
+        }
 
         Order order = new Order();
         orderRepository.save(order);
@@ -50,7 +48,6 @@ public class OrderService {
         order.setClientId(basket.getClient().getId());
         order.setOrderItems(orderItems);
         order.setTotal(basket.getTotal());
-        validatePaymentMethod(orderRequest.getPaymentMethod());
         order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod()));
 
         emptyShoppingBasket(basket);
@@ -75,9 +72,12 @@ public class OrderService {
 
         if (orderToBeUpdated.isPresent()) {
             Order orderFound = orderToBeUpdated.get();
-
             updateOrderRequest.update(orderFound);
             Order orderUpdated = orderRepository.save(orderFound);
+
+            if (isOrderCancelled(orderUpdated)) {
+                orderItemService.returnOrderItemsToInventory(orderUpdated.getOrderItems());
+            }
 
             return ResponseEntity.ok().body(orderUpdated);
         } else {
@@ -96,13 +96,9 @@ public class OrderService {
         }
     }
 
-    private void validatePaymentMethod(String paymentMethod) {
-        boolean isValid = Arrays.stream(PaymentMethod.values())
+    private boolean isValidPaymentMethod(String paymentMethod) {
+        return Arrays.stream(PaymentMethod.values())
                 .anyMatch(enumValue -> enumValue.name().equalsIgnoreCase(paymentMethod));
-
-        if(!isValid) {
-            throw new IllegalArgumentException("Método de pagamento inválido");
-        }
     }
 
     private void emptyShoppingBasket(ShoppingBasket basket) {
@@ -110,6 +106,10 @@ public class OrderService {
             basketItemService.deleteItem(item.getId());
         }
         basket.setTotal(new BigDecimal(0));
+    }
+
+    private boolean isOrderCancelled(Order order) {
+        return order.getStatus().equals(Status.CANCELADO);
     }
 
 }

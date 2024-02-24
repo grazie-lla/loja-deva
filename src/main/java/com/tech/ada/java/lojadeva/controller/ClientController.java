@@ -1,6 +1,7 @@
 package com.tech.ada.java.lojadeva.controller;
 
 import com.tech.ada.java.lojadeva.domain.Client;
+import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.dto.ClientResponse;
 import com.tech.ada.java.lojadeva.service.ClientService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/clients")
@@ -23,10 +25,10 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientRequest> registerClient(@Valid @RequestBody ClientRequest clientRequest) {
+    public ResponseEntity<ClientResponse> registerClient(@Valid @RequestBody ClientRequest clientRequest) {
         Client client = convertToClient(clientRequest);
         Client newClient = clientService.registerClient(client);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToClientRequest(newClient));
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToClientResponse(newClient));
     }
     @PutMapping("/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable Long id, @Valid @RequestBody Client clientRequest) {
@@ -38,6 +40,11 @@ public class ClientController {
     public ResponseEntity<Client> partialUpdateClient(@PathVariable Long id, @Valid @RequestBody ClientRequest clientRequest) {
         Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
         return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public List<Client> findAllClients() {
+        return clientService.findAllClients();
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClientResponse> getClientById(@PathVariable("id") Long id) {

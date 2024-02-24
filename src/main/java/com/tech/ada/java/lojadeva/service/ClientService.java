@@ -1,27 +1,38 @@
 package com.tech.ada.java.lojadeva.service;
 
+import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
 import com.tech.ada.java.lojadeva.repository.ClientRepository;
+import com.tech.ada.java.lojadeva.repository.ShoppingBasketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
 public class ClientService {
 
+    private final ClientRepository clientRepository;
+    private final ShoppingBasketService shoppingBasketService;
+
     @Autowired
-    private ClientRepository clientRepository;
+    public ClientService(ClientRepository clientRepository, ShoppingBasketService shoppingBasketService) {
+        this.clientRepository = clientRepository;
+        this.shoppingBasketService = shoppingBasketService;
+    }
 
     public Client registerClient(@Valid Client client) {
         validateClient(client);
 
         ShoppingBasket shoppingBasket = new ShoppingBasket();
-        client.setShoppingBasket(shoppingBasket);
         shoppingBasket.setClient(client);
+        ShoppingBasket savedShoppingBasket = shoppingBasketService.createShoppingBasket(shoppingBasket);
+
+        client.setShoppingBasket(savedShoppingBasket);
         return clientRepository.save(client);
     }
 
@@ -97,6 +108,10 @@ public class ClientService {
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
 
         clientRepository.delete(existingClient);
+    }
+
+    public List<Client> findAllClients() {
+        return clientRepository.findAll();
     }
     }
 
