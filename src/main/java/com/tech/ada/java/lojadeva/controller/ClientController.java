@@ -23,10 +23,10 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientRequest> registerClient(@Valid @RequestBody ClientRequest clientRequest) {
+    public ResponseEntity<ClientResponse> registerClient(@Valid @RequestBody ClientRequest clientRequest) {
         Client client = convertToClient(clientRequest);
         Client newClient = clientService.registerClient(client);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToClientRequest(newClient));
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToClientResponse(newClient));
     }
     @PutMapping("/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable Long id, @Valid @RequestBody Client clientRequest) {
