@@ -1,4 +1,4 @@
-package com.tech.ada.java.lojadeva.controller;
+package com.tech.ada.java.lojadeva.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
