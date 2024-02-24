@@ -26,11 +26,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-                .csrf(AbstractHttpConfigurer::disable)
-                /*.authorizeHttpRequests(auth -> {
+                .csrf(AbstractHttpConfigurer::disable);
+                http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers(HttpMethod.GET, "/product").permitAll();
                     auth.anyRequest().authenticated();
-                })*/
+                })
                 .authorizeHttpRequests((authorize) -> authorize.requestMatchers(publicPaths)
                         .permitAll()
                         .anyRequest()

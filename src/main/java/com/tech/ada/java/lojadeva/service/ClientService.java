@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.service;
 
+import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.domain.Client;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
@@ -106,6 +108,10 @@ public class ClientService {
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
 
         clientRepository.delete(existingClient);
+    }
+
+    public List<Client> findAllClients() {
+        return clientRepository.findAll();
     }
     }
 
