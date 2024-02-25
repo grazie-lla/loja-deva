@@ -18,11 +18,15 @@
 
 - [Gerenciamento de clientes](#gerenciamento-de-clientes)
 
-- [Gerenciamento de produtos](#gerenciamento-de-procutos)
+- [Gerenciamento de produtos](#gerenciamento-de-produtos)
 
 - [Gerenciamento de carrinhos de compras](#gerenciamento-de-carrinhos-de-compras)
 
 - [Gerenciamento dos itens dos carrinhos de compras](#gerenciamento-dos-itens-dos-carrinhos-de-compras)
+
+- [Gerenciamento dos pedidos](#gerenciamento-dos-pedidos)
+
+- [Gerenciamento dos itens dos pedidos](#gerenciamento-dos-itens-dos-pedidos)
 
 - [Desenvolvedoras](#desenvolvedoras)
 
@@ -297,8 +301,8 @@ Passar parâmetros no body da requisição em formato JSON:
 
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
-| `shoppingBasketId` | `string` | **Obrigatório**. | 
-| `productId` | `string` | **Obrigatório** |
+| `shoppingBasketId` | `Long` | **Obrigatório**. | 
+| `productId` | `Long` | **Obrigatório** |
 | `quantity` | `Integer` | **Obrigatório**. |
 
 #### Buscar item do carrinho de compras pelo seu ID
@@ -358,14 +362,95 @@ Rota autenticada - necessário configurar sua ferramenta de teste da aplicação
 | :---------- | :------------------------------------------ |
 | `id`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID do item que deseja deletar |
 
+## Gerenciamento de pedidos
+#### Registrar pedido
 
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth
+
+```http
+  POST localhost:8080/order
+```
+Passar parâmetros no body da requisição em formato JSON:
+
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `basketId` | `Long` | **Obrigatório**. | 
+| `paymentMethod` | `String` | **Obrigatório** |
+- retorna as informações do carrinho com o método de pagamento escolhido, data de criação e/ou atualização e o status do pedido.
+
+#### Buscar todos os pedidos
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+
+```http
+  GET localhost:8080/order/
+```
+
+#### Buscar pedido pelo ID
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+
+```http
+  GET localhost:8080/order/:id
+```
+| Parâmetro   | Descrição                                   |
+| :---------- | :------------------------------------------ |
+| `id`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID pedido que deseja detalhar |
+
+#### Atualização do status do pedido
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+
+```http
+  PUT localhost:8080/order/:id
+```
+ Passar como parâmetro na URL da requisição o ID do pedido que deseja atualizar.
+| Parâmetro   | Descrição                                   |
+| :---------- | :------------------------------------------ |
+| `id`      | **Obrigatório**.|
+
+Passar parâmetros no body da requisição em formato JSON:
+
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `status` | `String` | **Obrigatório**. |
+- retorna as informações do pedido com o novo status e data de atualização do pedido.
+
+#### Deletar pedido
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+```http
+  DELETE localhost:8080/order/:id
+```
+
+| Parâmetro   | Descrição                                   |
+| :---------- | :------------------------------------------ |
+| `id`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID do pedido que deseja deletar |
+
+## Gerenciamento dos itens dos pedidos
+#### Buscar itens do pedido pelo ID do pedido
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+
+```http
+  GET localhost:8080/order/:orderId/items
+```
+| Parâmetro   | Descrição                                   |
+| :---------- | :------------------------------------------ |
+| `id`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID pedido que deseja detalhar |
+
+#### Buscar item do pedido pelo ID do pedido e pelo ID do item
+Rota autenticada - necessário configurar sua ferramenta de teste da aplicação de preferência com Authorization - tipo Basic Auth.
+
+```http
+  GET localhost:8080/order/:orderId/items/:id
+```
+| Parâmetro   | Descrição                                   |
+| :---------- | :------------------------------------------ |
+| `orderId`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID pedido que deseja detalhar |
+| `id`      | **Obrigatório**. Passar como parâmetro na URL da requisição o ID item do pedido que deseja detalhar |
 
 ## Licença
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está licenciado sob a Licença MIT.
 
 ## Desenvolvedoras
 Para qualquer dúvida ou sugestão, entre em contato com a equipe de desenvolvimento:
-| [<img src="https://media.licdn.com/dms/image/D4D03AQE5y3lBKkJqMQ/profile-displayphoto-shrink_400_400/0/1702420057924?e=1714608000&v=beta&t=DhvcI0lbfslMew0eiLlgmUKvGIOtK1mHqmARbHQ3dmU" width=115><br><sub>Adilane Pereira</sub>](https://www.linkedin.com/in/adilane-borges/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) |  [<img src="https://media.licdn.com/dms/image/C4D03AQHZZ7hoeBMwxQ/profile-displayphoto-shrink_400_400/0/1611092925723?e=1714608000&v=beta&t=52PnMjX9L6DLh_L_jaaNIUzJrjexhQigGbTYqUZisTM" width=115><br><sub>Aline Werner</sub>](https://www.linkedin.com/in/alinewer/) |  [<img src="" width=115><br><sub>Ana Luiza Akiyama</sub>]() | [<img src="https://media.licdn.com/dms/image/C4D03AQF2yNZ3qZ3ZjQ/profile-displayphoto-shrink_400_400/0/1629249879532?e=1714608000&v=beta&t=nXzvMwaLOGbsMATomIbybI0IaHl3Gpxb8LoywvtaYkA" width=115><br><sub>Graziella Guedes</sub>](https://www.linkedin.com/in/graziellacosta/) | [<img src="https://media.licdn.com/dms/image/D4D35AQGgZcEVZlV8Iw/profile-framedphoto-shrink_800_800/0/1660592108061?e=1709438400&v=beta&t=Sf1mxxIOx7doSTSeDPgtgtYrbl_qYY5D5s8m7IrYAu8" width=115><br><sub>Nathalya Lucena</sub>](https://www.linkedin.com/in/nathalya-lucena-466773244/)
+| [<img src="https://media.licdn.com/dms/image/D4D03AQE5y3lBKkJqMQ/profile-displayphoto-shrink_400_400/0/1702420057924?e=1714608000&v=beta&t=DhvcI0lbfslMew0eiLlgmUKvGIOtK1mHqmARbHQ3dmU" width=115><br><sub>Adilane Pereira</sub>](https://www.linkedin.com/in/adilane-borges/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) |  [<img src="https://media.licdn.com/dms/image/C4D03AQHZZ7hoeBMwxQ/profile-displayphoto-shrink_400_400/0/1611092925723?e=1714608000&v=beta&t=52PnMjX9L6DLh_L_jaaNIUzJrjexhQigGbTYqUZisTM" width=115><br><sub>Aline Werner</sub>](https://www.linkedin.com/in/alinewer/) |  [<img src="https://avatars.githubusercontent.com/u/45232866?v=4" width=115><br><sub>Ana Luiza Akiyama</sub>](https://github.com/Akaori) | [<img src="https://media.licdn.com/dms/image/C4D03AQF2yNZ3qZ3ZjQ/profile-displayphoto-shrink_400_400/0/1629249879532?e=1714608000&v=beta&t=nXzvMwaLOGbsMATomIbybI0IaHl3Gpxb8LoywvtaYkA" width=115><br><sub>Graziella Guedes</sub>](https://www.linkedin.com/in/graziellacosta/) | [<img src="https://media.licdn.com/dms/image/D4D35AQGgZcEVZlV8Iw/profile-framedphoto-shrink_800_800/0/1660592108061?e=1709438400&v=beta&t=Sf1mxxIOx7doSTSeDPgtgtYrbl_qYY5D5s8m7IrYAu8" width=115><br><sub>Nathalya Lucena</sub>](https://www.linkedin.com/in/nathalya-lucena-466773244/)
 | :---: | :---: | :---: | :---: | :---: 
 
 
