@@ -27,11 +27,7 @@ public class SecurityConfig {
         http.headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .csrf(AbstractHttpConfigurer::disable);
-                http.authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(HttpMethod.GET, "/product").permitAll();
-                    auth.anyRequest().authenticated();
-                })
-                .authorizeHttpRequests((authorize) -> authorize.requestMatchers(publicPaths)
+               http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(publicPaths)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
