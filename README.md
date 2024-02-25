@@ -24,7 +24,7 @@
 
 - [Gerenciamento dos itens dos carrinhos de compras](#gerenciamento-dos-itens-dos-carrinhos-de-compras)
 
-- [Gerenciamento dos pedidos](#gerenciamento-dos-pedidos)
+- [Gerenciamento de pedidos](#gerenciamento-de-pedidos)
 
 - [Gerenciamento dos itens dos pedidos](#gerenciamento-dos-itens-dos-pedidos)
 
