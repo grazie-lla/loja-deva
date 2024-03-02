@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -107,5 +108,17 @@ class ClientControllerTest {
                 andDo(MockMvcResultHandlers.print());
 
         verify(clientService, times(1)).findAllClients();
+    }
+    @Test
+    public void deleteClientHttpRequest() throws Exception {
+        doNothing().when(clientService).deleteClient(Mockito.any());
+
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/clients/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(client)))
+                .andDo(MockMvcResultHandlers.print());
+
+        verify(clientService, times(1)).deleteClient(Mockito.any());
     }
 }
