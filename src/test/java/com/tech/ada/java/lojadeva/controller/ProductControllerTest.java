@@ -3,6 +3,7 @@ package com.tech.ada.java.lojadeva.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateProductDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,7 @@ class ProductControllerTest {
     private ProductRequest productRequest;
     private Product product;
     private UpdateProductRequest updateProductRequest;
+    private UpdateProductDetailsRequest updateProductDetailsRequest;
     private List<Product> productsList;
 
     @InjectMocks
@@ -46,6 +48,7 @@ class ProductControllerTest {
         productRequest = new ProductRequest("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
         product = new Product("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
         updateProductRequest = new UpdateProductRequest("IPhone X", "Smartphone", new BigDecimal("1100.99"), 11, "Eletrônicos");
+        updateProductDetailsRequest = new UpdateProductDetailsRequest("Smartphone", new BigDecimal("1000.99"), 10);
         mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
     }
 
@@ -101,6 +104,18 @@ class ProductControllerTest {
                 .andDo(MockMvcResultHandlers.print());
 
         verify(productService, times(1)).updateProduct(Mockito.any(), Mockito.any(UpdateProductRequest.class));
+    }
+    @Test
+    public void updateProductDetails() throws Exception {
+        when(productService.updateProductDetails(Mockito.any(), Mockito.any(UpdateProductDetailsRequest.class)))
+                .thenReturn(ResponseEntity.of(Optional.of(product)));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/product/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(updateProductDetailsRequest)))
+                        .andDo(MockMvcResultHandlers.print());
+
+        verify(productService, times(1)).updateProductDetails(Mockito.any(), Mockito.any(UpdateProductDetailsRequest.class));
     }
 
 
