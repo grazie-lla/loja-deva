@@ -81,7 +81,16 @@ class ClientControllerTest {
 
         verify(clientService, times(1)).updateClient(Mockito.any(),  Mockito.any(Client.class));
     }
+    @Test
+    public void partialUpdateClientHttpTest() throws Exception {
+        when(clientService.partialUpdateClient(Mockito.any(), Mockito.any(ClientRequest.class)))
+                .thenReturn(client);
 
+        mockMvc.perform(MockMvcRequestBuilders.patch("/clients/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(client)))
+                .andDo(MockMvcResultHandlers.print());
 
-
+        verify(clientService, times(1)).partialUpdateClient(Mockito.any(),  Mockito.any(ClientRequest.class));
+    }
 }
