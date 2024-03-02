@@ -2,10 +2,7 @@ package com.tech.ada.java.lojadeva.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tech.ada.java.lojadeva.domain.Client;
-import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ClientRequest;
-import com.tech.ada.java.lojadeva.dto.ProductRequest;
-import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
 import com.tech.ada.java.lojadeva.service.ClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,16 +12,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,5 +81,7 @@ class ClientControllerTest {
 
         verify(clientService, times(1)).updateClient(Mockito.any(),  Mockito.any(Client.class));
     }
+
+
 
 }
