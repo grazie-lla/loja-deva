@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,6 +28,8 @@ class ClientControllerTest {
     private ClientService clientService;
     private ClientRequest clientRequest;
     private Client client;
+
+    private List<Client> clientList;
 
     @InjectMocks
     private ClientController clientController;
@@ -92,5 +96,16 @@ class ClientControllerTest {
                 .andDo(MockMvcResultHandlers.print());
 
         verify(clientService, times(1)).partialUpdateClient(Mockito.any(),  Mockito.any(ClientRequest.class));
+    }
+    @Test
+    public void findAllClientsHttpRequest() throws Exception {
+        when(clientService.findAllClients()).thenReturn(clientList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/clients").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(client))).
+                andDo(MockMvcResultHandlers.print());
+
+        verify(clientService, times(1)).findAllClients();
     }
 }
