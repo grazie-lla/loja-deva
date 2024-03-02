@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -71,6 +72,18 @@ class ProductControllerTest {
                 content(asJsonString(productRequest))).andDo(MockMvcResultHandlers.print());
 
         verify(productService, times(1)).findAllProducts();
+    }
+
+    @Test
+    public void findProductByIdHttpRequest() throws Exception {
+        when(productService.findProductById(Mockito.any())).thenReturn(Optional.of(product));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/product/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(product))).
+                andDo(MockMvcResultHandlers.print());
+
+        verify(productService, times(1)).findProductById(Mockito.any());
     }
 
 
