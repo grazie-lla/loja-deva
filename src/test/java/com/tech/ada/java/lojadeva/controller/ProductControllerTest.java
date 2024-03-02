@@ -118,5 +118,18 @@ class ProductControllerTest {
         verify(productService, times(1)).updateProductDetails(Mockito.any(), Mockito.any(UpdateProductDetailsRequest.class));
     }
 
+    @Test
+    public void deleteProductByIdHttpRequest() throws Exception {
+        when(productService.deleteProductById(Mockito.any()))
+                .thenReturn(ResponseEntity.ok().body("Produto excluído com sucesso."));
+
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/product/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(product)))
+                        .andDo(MockMvcResultHandlers.print());
+
+        verify(productService, times(1)).deleteProductById(Mockito.any());
+    }
 
 }
