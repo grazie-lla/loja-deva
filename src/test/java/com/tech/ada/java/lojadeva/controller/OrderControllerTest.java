@@ -16,7 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +32,7 @@ class OrderControllerTest {
     @Mock
     private OrderService orderService;
     private Order order;
+    private List<Order> orderList;
     private OrderRequest orderRequest;
 
     @InjectMocks
@@ -53,19 +58,29 @@ class OrderControllerTest {
     }
 
     @Test
-    void generateOrderHttpTest() throws Exception {
+    public void generateOrderHttpTest() throws Exception {
         when(orderService.generateOrder(Mockito.any())).thenReturn(order);
-        mockMvc.perform(MockMvcRequestBuilders.post("/order")
-                .contentType(MediaType.APPLICATION_JSON).
-                content(asJsonString(order))).andExpect(status().isCreated());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/order").
+                contentType(MediaType.APPLICATION_JSON).
+                content(asJsonString(order))).
+                andExpect(status().isCreated());
 
         verify(orderService, times(1)).generateOrder(Mockito.any());
     }
 
 
-//    @Test
-//    void findAllOrdersHttpTest() {
-//    }
+    @Test
+    void findAllOrdersHttpTest() throws Exception {
+        when(orderService.findAllOrders()).thenReturn(orderList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/order").
+                contentType(MediaType.APPLICATION_JSON).
+                content(asJsonString(order))).
+                andDo(MockMvcResultHandlers.print());
+
+        verify(orderService, times(1)).findAllOrders();
+    }
 //
 //    @Test
 //    void findOrderByIdHttpTest() {
