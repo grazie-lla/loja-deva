@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tech.ada.java.lojadeva.domain.Order;
-import com.tech.ada.java.lojadeva.dto.OrderRequest;
+import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -33,7 +34,7 @@ class OrderControllerTest {
     private OrderService orderService;
     private Order order;
     private List<Order> orderList;
-    private OrderRequest orderRequest;
+    private UpdateOrderRequest updateOrderRequest;
 
     @InjectMocks
     private OrderController orderController;
@@ -42,7 +43,7 @@ class OrderControllerTest {
     @BeforeEach
     public void setup(){
         order = new Order();
-        orderRequest = new OrderRequest(1L, "credit card");
+        updateOrderRequest = new UpdateOrderRequest("PENDENTE");
         mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
     }
 
@@ -95,7 +96,6 @@ class OrderControllerTest {
 
     }
 
-
     @Test
     public void findOrdersByClientIdHttpTest() throws Exception{
         when(orderService.findOrdersByClientId(Mockito.anyLong())).thenReturn(orderList);
@@ -107,4 +107,19 @@ class OrderControllerTest {
                         .andDo(MockMvcResultHandlers.print());
         verify(orderService, times(1)).findOrdersByClientId(Mockito.anyLong());
     }
+
+        @Test
+    public void updateOrderHttpTest() throws Exception{
+        when(orderService.updateOrder(Mockito.anyLong(), eq(updateOrderRequest))).thenReturn(ResponseEntity.of(Optional.of(order)));
+
+            mockMvc.perform(MockMvcRequestBuilders.put("/order/1").
+                            contentType(MediaType.APPLICATION_JSON).
+                            content(asJsonString(order)))
+                    .andDo(MockMvcResultHandlers.print());
+            verify(orderService, times(1)).updateOrder(Mockito.anyLong(), eq(updateOrderRequest));
+        }
+
+//    @Test
+//    void deleteOrderByIdHttpTest() {
+//    }
 }
