@@ -94,4 +94,17 @@ class OrderControllerTest {
         verify(orderService,times(1)).findOrderById(Mockito.any());
 
     }
+
+
+    @Test
+    public void findOrdersByClientIdHttpTest() throws Exception{
+        when(orderService.findOrdersByClientId(Mockito.anyLong())).thenReturn(orderList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/order").
+                        param("clientId", "1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(orderList)))
+                        .andDo(MockMvcResultHandlers.print());
+        verify(orderService, times(1)).findOrdersByClientId(Mockito.anyLong());
+    }
 }
