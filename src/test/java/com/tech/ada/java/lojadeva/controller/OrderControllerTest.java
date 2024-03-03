@@ -108,7 +108,7 @@ class OrderControllerTest {
         verify(orderService, times(1)).findOrdersByClientId(Mockito.anyLong());
     }
 
-        @Test
+    @Test
     public void updateOrderHttpTest() throws Exception{
         when(orderService.updateOrder(Mockito.anyLong(), eq(updateOrderRequest))).thenReturn(ResponseEntity.of(Optional.of(order)));
 
@@ -119,7 +119,15 @@ class OrderControllerTest {
             verify(orderService, times(1)).updateOrder(Mockito.anyLong(), eq(updateOrderRequest));
         }
 
-//    @Test
-//    void deleteOrderByIdHttpTest() {
-//    }
+    @Test
+    void deleteOrderByIdHttpTest() throws Exception {
+        when(orderService.deleteOrderById(anyLong())).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/order/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(order)))
+                .andDo(MockMvcResultHandlers.print());
+
+        verify(orderService, times(1)).deleteOrderById(anyLong());
+    }
 }
