@@ -17,10 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -71,7 +71,7 @@ class OrderControllerTest {
 
 
     @Test
-    void findAllOrdersHttpTest() throws Exception {
+    public void findAllOrdersHttpTest() throws Exception {
         when(orderService.findAllOrders()).thenReturn(orderList);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/order").
@@ -81,22 +81,17 @@ class OrderControllerTest {
 
         verify(orderService, times(1)).findAllOrders();
     }
-//
-//    @Test
-//    void findOrderByIdHttpTest() {
-//    }
-//
-//    @Test
-//    void findOrdersByClientIdHttpTest() {
-//    }
-//
-//    @Test
-//    void updateOrderHttpTest() {
-//    }
-//
-//    @Test
-//    void deleteOrderByIdHttpTest() {
-//    }
 
-//
+    @Test
+    public void findOrderByIdHttpTest() throws Exception {
+        when(orderService.findOrderById(Mockito.any())).thenReturn(Optional.of(order));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(order))).
+                        andDo(MockMvcResultHandlers.print());
+
+        verify(orderService,times(1)).findOrderById(Mockito.any());
+
+    }
 }
