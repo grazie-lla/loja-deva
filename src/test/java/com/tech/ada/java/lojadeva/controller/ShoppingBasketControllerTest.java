@@ -57,4 +57,14 @@ class ShoppingBasketControllerTest {
         verify(shoppingBasketService, times(1)).findBasketById(Mockito.any());
     }
 
+    @Test
+    public void createShoppingBasket() throws Exception {
+        when(shoppingBasketService.createShoppingBasket(Mockito.any())).thenReturn(shoppingBasket);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/shopping-basket").
+                contentType(MediaType.APPLICATION_JSON).
+                content(asJsonString(shoppingBasket))).andExpect(status().isCreated());
+
+        verify(shoppingBasketService, times(1)).createShoppingBasket(Mockito.any());
+    }
 }
