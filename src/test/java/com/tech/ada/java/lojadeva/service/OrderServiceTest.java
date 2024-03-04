@@ -1,6 +1,7 @@
 package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -73,7 +73,25 @@ class OrderServiceTest {
     public void updateOrderTest() {}
 
     @Test
-    public void deleteOrderByIdTest() {}
+    public void deleteOrderByIdTest() {
+        Long orderId = 1L;
+        Order orderToDelete = new Order();
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderToDelete));
+
+        assertTrue(orderService.deleteOrderById(orderId));
+
+        verify(orderRepository).delete(orderToDelete);
+    }
+
+    @Test
+    public void deleteOrderByIdNotFoundTest() {
+        Long orderId = 1L;
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        assertFalse(orderService.deleteOrderById(orderId));
+
+        verify(orderRepository, never()).delete(any());
+    }
 
     @Test
     public void isValidPaymentMethodTest() {}
