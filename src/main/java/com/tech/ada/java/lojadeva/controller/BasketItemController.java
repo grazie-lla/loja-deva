@@ -18,12 +18,10 @@ import java.util.Optional;
 @RequestMapping("/basket-item")
 public class BasketItemController {
     private final BasketItemService basketItemService;
-    private final ModelMapper modelMapper;
 
     @Autowired
     public BasketItemController(BasketItemService basketItemService, ModelMapper modelMapper) {
         this.basketItemService = basketItemService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/items")
