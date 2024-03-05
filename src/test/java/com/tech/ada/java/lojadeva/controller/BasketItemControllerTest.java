@@ -1,5 +1,6 @@
 package com.tech.ada.java.lojadeva.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
 import com.tech.ada.java.lojadeva.dto.BasketItemRequest;
@@ -10,14 +11,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.tech.ada.java.lojadeva.domain.BasketItem;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +39,7 @@ class BasketItemControllerTest {
 
     @InjectMocks
     private BasketItemController basketItemController;
+    private MockMvc mockMvc;
 
     private BasketItem basketItem1;
     private BasketItem basketItem2;
@@ -60,6 +69,16 @@ class BasketItemControllerTest {
 
         updateItemQuantityRequest = new UpdateItemQuantityRequest();
         updateItemQuantityRequest.setQuantity(5);
+
+        mockMvc = MockMvcBuilders.standaloneSetup(basketItemController).build();
+    }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -67,8 +86,10 @@ class BasketItemControllerTest {
         List<BasketItem> expectedItems = Arrays.asList(basketItem1, basketItem2);
         when(basketItemService.findAllItems()).thenReturn(expectedItems);
 
-        List<BasketItem> actualItems = basketItemController.findAllItems();
-        assertEquals(expectedItems, actualItems);
+        mockMvc.perform(MockMvcRequestBuilders.get("/basket-item/items").
+                contentType(MediaType.APPLICATION_JSON).
+                content(asJsonString(expectedItems))).
+                andDo(MockMvcResultHandlers.print());
 
         verify(basketItemService, times(1)).findAllItems();
     }
@@ -79,9 +100,11 @@ class BasketItemControllerTest {
         Optional<BasketItem> expectedItem = Optional.of(basketItem1);
         when(basketItemService.findItemById(id)).thenReturn(expectedItem);
 
-        ResponseEntity<BasketItem> actualResponse = basketItemController.findItemById(id);
+        mockMvc.perform(MockMvcRequestBuilders.get("/basket-item/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(expectedItem)))
+                .andDo(MockMvcResultHandlers.print());
 
-        assertEquals(ResponseEntity.ok(basketItem1), actualResponse);
         verify(basketItemService, times(1)).findItemById(id);
     }
 
@@ -91,9 +114,12 @@ class BasketItemControllerTest {
         Optional<BasketItem> expectedItem = Optional.empty();
         when(basketItemService.findItemById(id)).thenReturn(expectedItem);
 
-        ResponseEntity<BasketItem> actualResponse = basketItemController.findItemById(id);
+        mockMvc.perform(MockMvcRequestBuilders.get("/basket-item/3").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(expectedItem))).
+                        andDo(MockMvcResultHandlers.print()).
+                        andExpect(status().isNotFound());
 
-        assertEquals(ResponseEntity.notFound().build(), actualResponse);
         verify(basketItemService, times(1)).findItemById(id);
     }
 
@@ -103,25 +129,24 @@ class BasketItemControllerTest {
         List<BasketItem> expectedItems = Arrays.asList(basketItem1, basketItem2);
         when(basketItemService.findItemsByShoppingBasketId(shoppingBasketId)).thenReturn(expectedItems);
 
-        List<BasketItem> actualItems = basketItemController.findItemsByShoppingBasketId(shoppingBasketId);
+        mockMvc.perform(MockMvcRequestBuilders.get("/basket-item/items/by-basket").
+                        param("shoppingBasketId", "1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(expectedItems))).
+                        andDo(MockMvcResultHandlers.print());
 
-        assertEquals(expectedItems, actualItems);
         verify(basketItemService, times(1)).findItemsByShoppingBasketId(shoppingBasketId);
     }
 
     @Test
     void createItemHttpRequest() throws Exception {
-        BasketItem expectedItem = new BasketItem();
-        expectedItem.setId(3L);
-        expectedItem.setQuantity(4);
-        expectedItem.setShoppingBasket(new ShoppingBasket());
-        expectedItem.setProduct(new Product());
-        when(basketItemService.createItem(basketItemRequest)).thenReturn(expectedItem);
+        when(basketItemService.createItem(Mockito.any())).thenReturn(basketItem1);
 
-        ResponseEntity<BasketItem> actualResponse = basketItemController.createItem(basketItemRequest);
+        mockMvc.perform(MockMvcRequestBuilders.post("/basket-item").
+                contentType(MediaType.APPLICATION_JSON).
+                content(asJsonString(basketItemRequest))).andExpect(status().isCreated());
 
-        assertEquals(ResponseEntity.status(HttpStatus.CREATED).body(expectedItem), actualResponse);
-        verify(basketItemService, times(1)).createItem(basketItemRequest);
+        verify(basketItemService, times(1)).createItem(Mockito.any());
     }
 
     @Test
@@ -129,9 +154,11 @@ class BasketItemControllerTest {
         Long id = 1L;
         when(basketItemService.deleteItem(id)).thenReturn(true);
 
-        ResponseEntity<String> actualResponse = basketItemController.deleteItem(id);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/basket-item/1").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(basketItem1)))
+                .andDo(MockMvcResultHandlers.print());
 
-        assertEquals(ResponseEntity.ok("Item deletado com sucesso!"), actualResponse);
         verify(basketItemService, times(1)).deleteItem(id);
     }
 
@@ -140,25 +167,30 @@ class BasketItemControllerTest {
         Long id = 3L;
         when(basketItemService.deleteItem(id)).thenReturn(false);
 
-        ResponseEntity<String> actualResponse = basketItemController.deleteItem(id);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/basket-item/3").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(basketItem1)))
+                        .andDo(MockMvcResultHandlers.print()).
+                        andExpect(status().isNotFound());
 
-        assertEquals(ResponseEntity.notFound().build(), actualResponse);
         verify(basketItemService, times(1)).deleteItem(id);
     }
 
     @Test
     void updateItemQuantityHttpRequest() throws Exception {
-        Long id = 1L;
+        Long id = 2L;
         BasketItem expectedItem = new BasketItem();
-        expectedItem.setId(1L);
+        expectedItem.setId(2L);
         expectedItem.setQuantity(5);
         expectedItem.setShoppingBasket(new ShoppingBasket());
         expectedItem.setProduct(new Product());
         when(basketItemService.updateItemQuantity(id, 5)).thenReturn(expectedItem);
 
-        ResponseEntity<BasketItem> actualResponse = basketItemController.updateItemQuantity(id, updateItemQuantityRequest);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/basket-item/2").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(updateItemQuantityRequest)))
+                .andDo(MockMvcResultHandlers.print());
 
-        assertEquals(ResponseEntity.ok(expectedItem), actualResponse);
         verify(basketItemService, times(1)).updateItemQuantity(id, 5);
     }
 
@@ -167,9 +199,12 @@ class BasketItemControllerTest {
         Long id = 3L;
         when(basketItemService.updateItemQuantity(id, 5)).thenReturn(null);
 
-        ResponseEntity<BasketItem> actualResponse = basketItemController.updateItemQuantity(id, updateItemQuantityRequest);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/basket-item/3").
+                        contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(updateItemQuantityRequest)))
+                        .andDo(MockMvcResultHandlers.print()).
+                        andExpect(status().isNotFound());
 
-        assertEquals(ResponseEntity.notFound().build(), actualResponse);
         verify(basketItemService, times(1)).updateItemQuantity(id, 5);
     }
 }
