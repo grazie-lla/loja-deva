@@ -60,18 +60,6 @@ public class ClientController {
         return ResponseEntity.noContent().build();
     }
 
-    private ClientRequest convertToClientRequest(Client client) {
-        ClientRequest clientRequest = new ClientRequest();
-        clientRequest.setName(client.getName());
-        clientRequest.setEmail(client.getEmail());
-        clientRequest.setCpf(client.getCpf());
-        clientRequest.setAddress(client.getAddress());
-        clientRequest.setPostalCode(client.getPostalCode());
-        clientRequest.setPhoneNumber(client.getPhoneNumber());
-        clientRequest.setPassword(client.getPassword());
-        return clientRequest;
-    }
-
     private ClientResponse convertToClientResponse(Client client) {
         ClientResponse clientResponse = new ClientResponse();
         clientResponse.setId(client.getId());
@@ -81,7 +69,6 @@ public class ClientController {
         clientResponse.setAddress(client.getAddress());
         clientResponse.setPostalCode(client.getPostalCode());
         clientResponse.setPhoneNumber(client.getPhoneNumber());
-//        clientResponse.setPassword(clientResponse.getPassword());
 
         return clientResponse;
     }
