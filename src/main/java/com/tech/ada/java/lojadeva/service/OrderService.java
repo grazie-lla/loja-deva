@@ -96,19 +96,19 @@ public class OrderService {
         }
     }
 
-    private boolean isValidPaymentMethod(String paymentMethod) {
+    public boolean isValidPaymentMethod(String paymentMethod) {
         return Arrays.stream(PaymentMethod.values())
                 .anyMatch(enumValue -> enumValue.name().equalsIgnoreCase(paymentMethod));
     }
 
-    private void emptyShoppingBasket(ShoppingBasket basket) {
+    public void emptyShoppingBasket(ShoppingBasket basket) {
         for (BasketItem item : basket.getBasketItems()) {
             basketItemService.deleteItem(item.getId());
         }
         basket.setTotal(new BigDecimal(0));
     }
 
-    private boolean isOrderCancelled(Order order) {
+    public boolean isOrderCancelled(Order order) {
         return order.getStatus().equals(Status.CANCELADO);
     }
 
