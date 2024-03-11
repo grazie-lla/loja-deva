@@ -84,17 +84,16 @@ class OrderControllerTest {
                         .post("/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderRequest)))
-                        .andExpect(status().isCreated())
-                        .andDo(MockMvcResultHandlers.print())
-                        .andReturn();
-
-        verify(orderService).generateOrder(orderRequest);
+                .andExpect(status().isCreated())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         Order responseOrder = objectMapper.readValue(responseBody, Order.class);
-        assertEquals(order.getId(), responseOrder.getId());
+
+        verify(orderService).generateOrder(orderRequest);
+        assertFalse(responseBody.isEmpty());
+        assertEquals(order, responseOrder);
     }
 
     @Test
@@ -105,16 +104,15 @@ class OrderControllerTest {
                         .get("/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
-                        .andExpect(status().isOk())
-                        .andDo(MockMvcResultHandlers.print())
-                        .andReturn();
-
-        verify(orderService).findAllOrders();
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
+
+        verify(orderService).findAllOrders();
+        assertFalse(responseBody.isEmpty());
         assertEquals(orderList, responseOrderList);
     }
 
@@ -126,16 +124,15 @@ class OrderControllerTest {
                         .get("/order/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        verify(orderService).findOrderById(Mockito.any());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         Order responseOrder = objectMapper.readValue(responseBody, Order.class);
+
+        verify(orderService).findOrderById(Mockito.any());
+        assertFalse(responseBody.isEmpty());
         assertEquals(order.getId(), responseOrder.getId());
     }
 
@@ -147,13 +144,13 @@ class OrderControllerTest {
                         .get("/order/123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isNotFound())
-                        .andReturn();
-
-        verify(orderService).findOrderById(Mockito.any());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
+
+        verify(orderService).findOrderById(Mockito.any());
         assertTrue(responseBody.isEmpty());
     }
 
@@ -166,16 +163,15 @@ class OrderControllerTest {
                         .param("clientId", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        verify(orderService).findOrdersByClientId(Mockito.anyLong());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
+
+        verify(orderService).findOrdersByClientId(Mockito.anyLong());
+        assertFalse(responseBody.isEmpty());
         assertEquals(orderList, responseOrderList);
     }
 
@@ -188,16 +184,15 @@ class OrderControllerTest {
                         .param("clientId", "123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        verify(orderService).findOrdersByClientId(Mockito.anyLong());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
+
+        verify(orderService).findOrdersByClientId(Mockito.anyLong());
+        assertFalse(responseBody.isEmpty());
         assertTrue(responseOrderList.isEmpty());
     }
 
@@ -210,16 +205,15 @@ class OrderControllerTest {
                         .put("/order/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(updateOrderRequest)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        verify(orderService).updateOrder(Mockito.anyLong(), eq(updateOrderRequest));
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        assertFalse(responseBody.isEmpty());
-
         Order responseOrder = objectMapper.readValue(responseBody, Order.class);
+
+        verify(orderService).updateOrder(Mockito.anyLong(), eq(updateOrderRequest));
+        assertFalse(responseBody.isEmpty());
         assertEquals(order, responseOrder);
     }
 
@@ -231,13 +225,13 @@ class OrderControllerTest {
                         .delete("/order/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isOk())
-                        .andReturn();
-
-        verify(orderService).deleteOrderById(anyLong());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
+
+        verify(orderService).deleteOrderById(anyLong());
         assertFalse(responseBody.isEmpty());
         assertEquals("Pedido excluído com sucesso.", responseBody);
     }
@@ -250,13 +244,13 @@ class OrderControllerTest {
                         .delete("/order/123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
-                        .andDo(MockMvcResultHandlers.print())
-                        .andExpect(status().isNotFound())
-                        .andReturn();
-
-        verify(orderService).deleteOrderById(anyLong());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
+
+        verify(orderService).deleteOrderById(anyLong());
         assertTrue(responseBody.isEmpty());
     }
 }
