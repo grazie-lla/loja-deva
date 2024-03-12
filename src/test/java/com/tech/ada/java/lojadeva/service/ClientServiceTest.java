@@ -45,7 +45,6 @@ class ClientServiceTest {
 
         basket = new ShoppingBasket();
         basket.setClient(client);
-        //client.setShoppingBasket(basket);
 
         clients = List.of(client);
     }
@@ -68,7 +67,7 @@ class ClientServiceTest {
     }
 
     @Test
-    void registerInvalidClientTest() {
+    void registerClientWithInvalidCPFTest() {
         Client invalidClient = new Client();
         invalidClient.setCpf("123");
 
@@ -81,23 +80,26 @@ class ClientServiceTest {
     }
 
     @Test
+    void registerClientWhenCPFAlreadyExistsTest() {
+        Client duplicateClient = new Client();
+        duplicateClient.setCpf("123.456.789-00");
+
+        when(clientRepository.findByCpf(duplicateClient.getCpf())).thenReturn(new Client());
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> clientService.registerClient(duplicateClient));
+
+        assertEquals("CPF já cadastrado!", exception.getMessage());
+        verify(shoppingBasketService, never()).createShoppingBasket(any());
+        verify(clientRepository, never()).save(any());
+    }
+
+    @Test
     void updateClientTest() {
     }
 
     @Test
     void updateClientNotFoundTest() {
-    }
-
-    @Test
-    void validateClientTest() {
-    }
-
-    @Test
-    void validateClientWhenInvalidCPFTest() {
-    }
-
-    @Test
-    void validateClientWhenCPFAlreadyExistsTest() {
     }
 
     @Test
