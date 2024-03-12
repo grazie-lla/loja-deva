@@ -29,6 +29,7 @@ class ClientServiceTest {
 
     private Client client;
     private List<Client> clients;
+    private ShoppingBasket basket;
 
     @BeforeEach
     void setup() {
@@ -42,14 +43,41 @@ class ClientServiceTest {
         client.setPhoneNumber("(11)999999999");
         client.setPassword("password");
 
-        ShoppingBasket basket = new ShoppingBasket();
-        client.setShoppingBasket(basket);
+        basket = new ShoppingBasket();
+        basket.setClient(client);
+        //client.setShoppingBasket(basket);
 
         clients = List.of(client);
     }
 
     @Test
     void registerClientTest() {
+        Client expectedClient = client;
+        ShoppingBasket expectedBasket = basket;
+
+        when(shoppingBasketService.createShoppingBasket(any(ShoppingBasket.class))).thenReturn(expectedBasket);
+        when(clientRepository.save(any(Client.class))).thenReturn(expectedClient);
+
+        Client actualClient = clientService.registerClient(expectedClient);
+
+        assertNotNull(actualClient);
+        assertSame(expectedClient, actualClient);
+        assertSame(expectedBasket.getClient(), actualClient);
+        assertSame(expectedBasket, actualClient.getShoppingBasket());
+        verify(clientRepository).save(expectedClient);
+    }
+
+    @Test
+    void registerInvalidClientTest() {
+        Client invalidClient = new Client();
+        invalidClient.setCpf("123");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> clientService.registerClient(invalidClient));
+
+        assertEquals("CPF Inválido!", exception.getMessage());
+        verify(shoppingBasketService, never()).createShoppingBasket(any());
+        verify(clientRepository, never()).save(any());
     }
 
     @Test
