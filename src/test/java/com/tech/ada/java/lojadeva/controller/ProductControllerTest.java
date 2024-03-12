@@ -5,7 +5,9 @@ import com.tech.ada.java.lojadeva.domain.Product;
 import com.tech.ada.java.lojadeva.dto.ProductRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateProductDetailsRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateProductRequest;
+import com.tech.ada.java.lojadeva.repository.ProductRepository;
 import com.tech.ada.java.lojadeva.service.ProductService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,17 +23,22 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
     @Mock
     private ProductService productService;
+    @Mock
+    private ProductRepository productRepository;
     private ProductRequest productRequest;
+    @Mock
     private Product product;
     private UpdateProductRequest updateProductRequest;
     private UpdateProductDetailsRequest updateProductDetailsRequest;
@@ -46,7 +53,8 @@ class ProductControllerTest {
         productRequest = new ProductRequest("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
         product = new Product("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
         updateProductRequest = new UpdateProductRequest("IPhone X", "Smartphone", new BigDecimal("1100.99"), 11, "Eletrônicos");
-        updateProductDetailsRequest = new UpdateProductDetailsRequest("Smartphone", new BigDecimal("1000.99"), 10);
+        updateProductDetailsRequest = new UpdateProductDetailsRequest("Smartphone", new BigDecimal("1010.99"), 9);
+        productsList = Arrays.asList(product, new Product("IPhone X", "Smartphone", new BigDecimal("1100.99"), 11, "Eletrônicos"));
         mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
     }
 
@@ -60,13 +68,21 @@ class ProductControllerTest {
 
     @Test
     public void registerProductHttpTest() throws Exception {
+        BigDecimal expectedPrice = new BigDecimal("1000.99");
+        BigDecimal tolerance = new BigDecimal("0.01");
+        product.setId(1L);
         when(productService.registerProduct(Mockito.any())).thenReturn(product);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/product").
+        var response = mockMvc.perform(MockMvcRequestBuilders.post("/product").
                 contentType(MediaType.APPLICATION_JSON).
                 content(asJsonString(productRequest))).andExpect(status().isCreated());
 
-        verify(productService, times(1)).registerProduct(Mockito.any());
+        response.andExpect(jsonPath("$.id").value(1)).
+                andExpect(jsonPath("$.name", equalTo("IPhone"))).
+                andExpect(jsonPath("$.description", equalTo("Smartphone"))).
+                andExpect(jsonPath("$.price",  Matchers.closeTo(expectedPrice.doubleValue(), tolerance.doubleValue()))).
+                andExpect(jsonPath("$.inventoryQuantity", equalTo(10))).
+                andExpect(jsonPath("$.category", equalTo("Eletrônicos")));
     }
 
     @Test
@@ -75,59 +91,65 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/product").
                 contentType(MediaType.APPLICATION_JSON).
-                content(asJsonString(productRequest))).andDo(MockMvcResultHandlers.print());
+                content(asJsonString(productRequest))).andDo(MockMvcResultHandlers.print()).
+                andExpect(jsonPath("$[0].name", equalTo("IPhone"))).
+                andExpect(jsonPath("$[1].name", equalTo("IPhone X")));
 
-        verify(productService, times(1)).findAllProducts();
     }
 
     @Test
     public void findProductByIdHttpRequest() throws Exception {
+        product.setId(1L);
+
         when(productService.findProductById(Mockito.any())).thenReturn(Optional.of(product));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/product/1").
+        mockMvc.perform(MockMvcRequestBuilders.get("/product/{id}", 1).
                         contentType(MediaType.APPLICATION_JSON).
                         content(asJsonString(product))).
-                andDo(MockMvcResultHandlers.print());
-
-        verify(productService, times(1)).findProductById(Mockito.any());
+                        andDo(MockMvcResultHandlers.print()).
+                        andExpect(jsonPath("$.id").value(1)).
+                        andExpect(jsonPath("$.name", equalTo("IPhone")));
     }
     @Test
     public void updateProductHttpTest() throws Exception {
+        product.setId(1L);
+
         when(productService.updateProduct(Mockito.any(), Mockito.any(UpdateProductRequest.class)))
                 .thenReturn(ResponseEntity.of(Optional.of(product)));
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/product/1").
+        mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", 1).
                 contentType(MediaType.APPLICATION_JSON).
                 content(asJsonString(updateProductRequest)))
-                .andDo(MockMvcResultHandlers.print());
-
-        verify(productService, times(1)).updateProduct(Mockito.any(), Mockito.any(UpdateProductRequest.class));
+                .andDo(MockMvcResultHandlers.print()).
+                andExpect(jsonPath("$.id").value(1)).
+                andExpect(jsonPath("$.name", equalTo("IPhone X")));
     }
     @Test
     public void updateProductDetails() throws Exception {
+        product.setId(1L);
+
         when(productService.updateProductDetails(Mockito.any(), Mockito.any(UpdateProductDetailsRequest.class)))
                 .thenReturn(ResponseEntity.of(Optional.of(product)));
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/product/1").
+        mockMvc.perform(MockMvcRequestBuilders.patch("/product/{id}", 1).
                         contentType(MediaType.APPLICATION_JSON).
                         content(asJsonString(updateProductDetailsRequest)))
                         .andDo(MockMvcResultHandlers.print());
-
-        verify(productService, times(1)).updateProductDetails(Mockito.any(), Mockito.any(UpdateProductDetailsRequest.class));
     }
 
     @Test
     public void deleteProductByIdHttpRequest() throws Exception {
+        product.setId(1L);
         when(productService.deleteProductById(Mockito.any()))
                 .thenReturn(ResponseEntity.ok().body("Produto excluído com sucesso."));
 
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/product/1").
+        mockMvc.perform(MockMvcRequestBuilders.delete("/product/{id}", 1).
                         contentType(MediaType.APPLICATION_JSON).
-                        content(asJsonString(product)))
-                        .andDo(MockMvcResultHandlers.print());
-
-        verify(productService, times(1)).deleteProductById(Mockito.any());
+                        content(asJsonString(product))).
+                        andDo(MockMvcResultHandlers.print()).
+                        andExpect(status().isOk()).
+                        andExpect(content().string("Produto excluído com sucesso."));
     }
 
 }
