@@ -8,10 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,49 +25,53 @@ class ShoppingBasketServiceImplTest {
     @Mock
     private ShoppingBasketRepository shoppingBasketRepository;
 
+    @InjectMocks
     private ShoppingBasketServiceImpl shoppingBasketService;
+
+    private ShoppingBasket shoppingBasket;
+
+    private List<ShoppingBasket> shoppingBasketList;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        shoppingBasketService = new ShoppingBasketServiceImpl(shoppingBasketRepository);
+
+        shoppingBasket = new ShoppingBasket();
+        shoppingBasketList = new ArrayList<>();
     }
 
     @Test
     public void testFindAllBaskets() {
-        List<ShoppingBasket> expectedBaskets = new ArrayList<>();
-        when(shoppingBasketRepository.findAll()).thenReturn(expectedBaskets);
+        when(shoppingBasketRepository.findAll()).thenReturn(shoppingBasketList);
 
         List<ShoppingBasket> result = shoppingBasketService.findAllBaskets();
 
-        assertEquals(expectedBaskets, result);
+        assertEquals(shoppingBasketList, result);
     }
 
     @Test
     public void testFindBasketById() {
-        long basketId = 1L;
-        ShoppingBasket mockBasket = new ShoppingBasket();
-        mockBasket.setId(basketId);
-        mockBasket.setTotal(new BigDecimal(0));
+        shoppingBasket.setId(1L);
+//        shoppingBasket.setBasketItems();
+        shoppingBasket.setTotal(new BigDecimal(0));
 
-        when(shoppingBasketRepository.findById(basketId)).thenReturn(Optional.of(mockBasket));
+        when(shoppingBasketRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(shoppingBasket));
 
-        Optional<ShoppingBasket> result = shoppingBasketService.findBasketById(basketId);
+        Optional<ShoppingBasket> result = shoppingBasketService.findBasketById(1L);
 
         //dando erro: java.lang.NullPointerException: Cannot invoke "java.util.List.iterator()" because "items" is null
         assertTrue(result.isPresent());
-        assertEquals(mockBasket.getId(), result.get().getId());
-        assertEquals(mockBasket.getTotal(), result.get().getTotal());
+        assertEquals(shoppingBasket.getId(), result.get().getId());
+        assertEquals(shoppingBasket.getTotal(), result.get().getTotal());
     }
 
     @Test
     public void testCreateShoppingBasket() {
-        ShoppingBasket newBasket = new ShoppingBasket();
 
-        when(shoppingBasketRepository.save(newBasket)).thenReturn(newBasket);
+        when(shoppingBasketRepository.save(shoppingBasket)).thenReturn(shoppingBasket);
 
-        ShoppingBasket result = shoppingBasketService.createShoppingBasket(newBasket);
+        ShoppingBasket result = shoppingBasketService.createShoppingBasket(shoppingBasket);
 
-        assertEquals(newBasket, result);
+        assertEquals(shoppingBasket, result);
     }
 }
