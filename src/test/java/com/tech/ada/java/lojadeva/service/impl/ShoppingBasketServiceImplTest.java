@@ -30,7 +30,11 @@ class ShoppingBasketServiceImplTest {
 
     private ShoppingBasket shoppingBasket;
 
+    private Product product;
+
     private List<ShoppingBasket> shoppingBasketList;
+
+    private List<BasketItem> basketItemList;
 
     @BeforeEach
     public void setUp() {
@@ -38,6 +42,14 @@ class ShoppingBasketServiceImplTest {
 
         shoppingBasket = new ShoppingBasket();
         shoppingBasketList = new ArrayList<>();
+        product = new Product("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
+        basketItemList = new ArrayList<>();
+        BasketItem basketItem1 = new BasketItem();
+        basketItem1.setId(1L);
+        basketItem1.setQuantity(2);
+        basketItem1.setShoppingBasket(shoppingBasket);
+        basketItem1.setProduct(product);
+        basketItemList.add(basketItem1);
     }
 
     @Test
@@ -52,14 +64,13 @@ class ShoppingBasketServiceImplTest {
     @Test
     public void testFindBasketById() {
         shoppingBasket.setId(1L);
-//        shoppingBasket.setBasketItems();
-        shoppingBasket.setTotal(new BigDecimal(0));
+        shoppingBasket.setBasketItems(basketItemList);
 
         when(shoppingBasketRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(shoppingBasket));
 
         Optional<ShoppingBasket> result = shoppingBasketService.findBasketById(1L);
 
-        //dando erro: java.lang.NullPointerException: Cannot invoke "java.util.List.iterator()" because "items" is null
+
         assertTrue(result.isPresent());
         assertEquals(shoppingBasket.getId(), result.get().getId());
         assertEquals(shoppingBasket.getTotal(), result.get().getTotal());
