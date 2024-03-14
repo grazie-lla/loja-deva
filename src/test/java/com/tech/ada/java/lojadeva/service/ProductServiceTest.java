@@ -78,7 +78,7 @@ class ProductServiceTest {
     }
 
     @Test
-    public void findProductById() {
+    public void findProductByIdTest() {
         when(productRepository.findById(Mockito.any())).thenReturn(Optional.of(product));
         product.setId(1L);
         Product expectedProduct = productService.findProductById(1L).get();
@@ -89,7 +89,7 @@ class ProductServiceTest {
     }
 
     @Test
-    public void updateProduct_ProductFound() {
+    public void updateProduct_ProductFoundTest() {
 
         Product updatedProduct = new Product(
                 updateProductRequest.name(),
@@ -112,7 +112,7 @@ class ProductServiceTest {
     }
 
     @Test
-    public void updateProduct_ProductNotFound() {
+    public void updateProduct_ProductNotFoundTest() {
         when(productRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<Product> result = productService.updateProduct(1L, updateProductRequest);
@@ -125,16 +125,19 @@ class ProductServiceTest {
     }
 
     @Test
-    public void updateProductDetails_ProductFound() {
+    public void updateProductDetails_ProductFoundTest() {
         when(productRepository.findById(Mockito.any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
 
         ResponseEntity<Product> result = productService.updateProductDetails(1L, updateDetailsRequest);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(product, result.getBody());
+
     }
 
     @Test
-    public void updateProductDetails_ProductNotFound() {
+    public void updateProductDetails_ProductNotFoundTest() {
         when(productRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<Product> result = productService.updateProductDetails(1L, updateDetailsRequest);
@@ -144,6 +147,30 @@ class ProductServiceTest {
         assertNull(result.getBody());
 
         verify(productRepository, never()).save(Mockito.any());
+    }
+
+    @Test
+    public void updateProductDetails_DescriptionNotNullTest() {
+        UpdateProductDetailsRequest updateRequest = new UpdateProductDetailsRequest("Nova descrição", null, null);
+
+        when(productRepository.findById(any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
+
+        ResponseEntity<Product> result = productService.updateProductDetails(1L, updateRequest);
+
+        assertEquals("Nova descrição", result.getBody().getDescription());
+    }
+
+    @Test
+    public void updateProductDetails_QuantityNotNullTest() {
+        UpdateProductDetailsRequest updateRequest = new UpdateProductDetailsRequest(null, null, 5);
+
+        when(productRepository.findById(any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
+
+        ResponseEntity<Product> result = productService.updateProductDetails(1L, updateRequest);
+
+        assertEquals(5, result.getBody().getInventoryQuantity());
     }
 
     @Test
