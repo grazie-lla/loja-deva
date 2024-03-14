@@ -2,6 +2,7 @@ package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.Client;
 import com.tech.ada.java.lojadeva.domain.ShoppingBasket;
+import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,65 @@ class ClientServiceTest {
 
     @Test
     void partialUpdateClientTest() {
+        Long id = 1L;
+        Client existingClient = new Client();
+        existingClient.setId(id);
+        existingClient.setName("Existing Name");
+        existingClient.setEmail("existing@example.com");
+
+        ClientRequest clientRequest = new ClientRequest();
+        clientRequest.setName("New Name");
+        clientRequest.setEmail("new@example.com");
+        clientRequest.setCpf("000.000.000-00");
+        clientRequest.setAddress("R teste");
+        clientRequest.setPostalCode("000000000");
+        clientRequest.setPhoneNumber("11999999999");
+        clientRequest.setPassword("TesteSenha@123");
+
+        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.save(any(Client.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
+
+        assertEquals("New Name", updatedClient.getName());
+        assertEquals("new@example.com", updatedClient.getEmail());
+        assertEquals("000.000.000-00", updatedClient.getCpf());
+        assertEquals("R teste", updatedClient.getAddress());
+        assertEquals("000000000", updatedClient.getPostalCode());
+        assertEquals("11999999999", updatedClient.getPhoneNumber());
+        assertEquals("TesteSenha@123", updatedClient.getPassword());
+        verify(clientRepository).save(existingClient);
+    }
+
+    @Test
+    void partialUpdateClientTestWhenNullValues() {
+        Long id = 1L;
+        Client existingClient = new Client();
+        existingClient.setId(id);
+        existingClient.setName("Existing Name");
+        existingClient.setEmail("existing@example.com");
+
+        ClientRequest clientRequest = new ClientRequest();
+
+        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.save(any(Client.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
+
+        assertEquals("Existing Name", updatedClient.getName());
+        assertEquals("existing@example.com", updatedClient.getEmail());
+    }
+
+    @Test
+    void partialUpdateClientTestWhenClientNotFound() {
+        Long nonExistingId = 5L;
+        when(clientRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> clientService.partialUpdateClient(nonExistingId, any()));
+
+        verify(clientRepository, never()).delete(any());
+        assertEquals("Cliente não encontrado!", exception.getMessage());
     }
 
     @Test
