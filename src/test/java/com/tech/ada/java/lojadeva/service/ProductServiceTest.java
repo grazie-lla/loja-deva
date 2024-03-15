@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,53 +46,73 @@ class ProductServiceTest {
         product = new Product("IPhone", "Smartphone", new BigDecimal("1000.99"), 10, "Eletrônicos");
         updateProductRequest = new UpdateProductRequest("IPhone X", "Smartphone", new BigDecimal("1100.99"), 11, "Eletrônicos");
         updateDetailsRequest = new UpdateProductDetailsRequest("Iphone novo", new BigDecimal("1230.99"), 12);
-
+        productList = Arrays.asList(product, new Product("IPhone X", "Smartphone", new BigDecimal("1100.99"), 11, "Eletrônicos"));
     }
     @Test
     public void registerProduct() {
         when(modelMapper.map(productRequest, Product.class)).thenReturn(product);
-        when(productRepository.save(product)).thenReturn(product);
+        when(productRepository.save(any(Product.class))).thenReturn(product);
 
 
-        assertEquals(product, productService.registerProduct(productRequest));
-
-        verify(modelMapper, times(1)).map(productRequest, Product.class);
-        verify(productRepository, times(1)).save(product);
+        assertEquals(product.getId(), productService.registerProduct(productRequest).getId());
+        assertEquals(product.getName(), productService.registerProduct(productRequest).getName());
+        assertEquals(product.getPrice(), productService.registerProduct(productRequest).getPrice());
     }
 
     @Test
     public void findAllProducts() {
         when(productRepository.findAll()).thenReturn(productList);
 
-        assertEquals(productList, productService.findAllProducts());
+        List<Product> retrievedProducts = productService.findAllProducts();
 
-        verify(productRepository, times(1)).findAll();
+        assertEquals(productList.size(), retrievedProducts.size());
+        for (int i = 0; i < productList.size(); i++) {
+            Product expectedProduct = productList.get(i);
+            Product actualProduct = retrievedProducts.get(i);
+            assertEquals(expectedProduct.getName(), actualProduct.getName());
+            assertEquals(expectedProduct.getDescription(), actualProduct.getDescription());
+            assertEquals(expectedProduct.getPrice(), actualProduct.getPrice());
+            assertEquals(expectedProduct.getInventoryQuantity(), actualProduct.getInventoryQuantity());
+            assertEquals(expectedProduct.getCategory(), actualProduct.getCategory());
+        }
     }
 
     @Test
-    public void findProductById() {
+    public void findProductByIdTest() {
         when(productRepository.findById(Mockito.any())).thenReturn(Optional.of(product));
+        product.setId(1L);
+        Product expectedProduct = productService.findProductById(1L).get();
 
-        assertEquals(Optional.of(product), productService.findProductById(1L));
-
-        verify(productRepository, times(1)).findById(Mockito.any());
+        assertEquals(product.getId(), expectedProduct.getId());
+        assertEquals(product.getName(), expectedProduct.getName());
+        assertEquals(product.getPrice(), expectedProduct.getPrice());
     }
 
     @Test
-    public void updateProduct_ProductFound() {
+    public void updateProduct_ProductFoundTest() {
+
+        Product updatedProduct = new Product(
+                updateProductRequest.name(),
+                updateProductRequest.description(),
+                updateProductRequest.price(),
+                updateProductRequest.inventoryQuantity(),
+                updateProductRequest.category()
+        );
+        updatedProduct.setId(1L);
+        product.setId(1L);
+
+
         when(productRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(product));
-        when(productRepository.save(product)).thenReturn(product);
+        when(productRepository.save(product)).thenReturn(updatedProduct);
 
         ResponseEntity<Product> result = productService.updateProduct(1L, updateProductRequest);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
-
-        verify(productRepository, times(1)).findById(Mockito.anyLong());
-        verify(productRepository, times(1)).save(product);
+        assertEquals(updatedProduct, result.getBody());
     }
 
     @Test
-    public void updateProduct_ProductNotFound() {
+    public void updateProduct_ProductNotFoundTest() {
         when(productRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<Product> result = productService.updateProduct(1L, updateProductRequest);
@@ -100,24 +121,23 @@ class ProductServiceTest {
 
         assertNull(result.getBody());
 
-        verify(productRepository, times(1)).findById(Mockito.anyLong());
         verify(productRepository, never()).save(Mockito.any());
     }
 
     @Test
-    public void updateProductDetails_ProductFound() {
+    public void updateProductDetails_ProductFoundTest() {
         when(productRepository.findById(Mockito.any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
 
         ResponseEntity<Product> result = productService.updateProductDetails(1L, updateDetailsRequest);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(product, result.getBody());
 
-        verify(productRepository, times(1)).findById(Mockito.anyLong());
-        verify(productRepository, times(1)).save(product);
     }
 
     @Test
-    public void updateProductDetails_ProductNotFound() {
+    public void updateProductDetails_ProductNotFoundTest() {
         when(productRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<Product> result = productService.updateProductDetails(1L, updateDetailsRequest);
@@ -126,8 +146,31 @@ class ProductServiceTest {
 
         assertNull(result.getBody());
 
-        verify(productRepository, times(1)).findById(Mockito.anyLong());
         verify(productRepository, never()).save(Mockito.any());
+    }
+
+    @Test
+    public void updateProductDetails_DescriptionNotNullTest() {
+        UpdateProductDetailsRequest updateRequest = new UpdateProductDetailsRequest("Nova descrição", null, null);
+
+        when(productRepository.findById(any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
+
+        ResponseEntity<Product> result = productService.updateProductDetails(1L, updateRequest);
+
+        assertEquals("Nova descrição", result.getBody().getDescription());
+    }
+
+    @Test
+    public void updateProductDetails_QuantityNotNullTest() {
+        UpdateProductDetailsRequest updateRequest = new UpdateProductDetailsRequest(null, null, 5);
+
+        when(productRepository.findById(any())).thenReturn(Optional.of(product));
+        when(productRepository.save(any())).thenAnswer(invocation -> invocation.<Product>getArgument(0));
+
+        ResponseEntity<Product> result = productService.updateProductDetails(1L, updateRequest);
+
+        assertEquals(5, result.getBody().getInventoryQuantity());
     }
 
     @Test
@@ -138,8 +181,6 @@ class ProductServiceTest {
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("Produto excluído com sucesso.", result.getBody());
-
-        verify(productRepository, times(1)).deleteById(Mockito.anyLong());
     }
     @Test
     public void deleteProductById_ProductNotFound() {

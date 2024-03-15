@@ -78,7 +78,7 @@ public class ClientService {
             existingClient.setEmail(clientRequest.getEmail());
         }
         if (clientRequest.getCpf() != null) {
-            existingClient.setCpf(clientRequest.getEmail());
+            existingClient.setCpf(clientRequest.getCpf());
         }
         if (clientRequest.getAddress() != null) {
             existingClient.setAddress(clientRequest.getAddress());

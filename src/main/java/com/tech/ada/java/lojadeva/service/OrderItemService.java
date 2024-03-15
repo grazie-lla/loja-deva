@@ -49,7 +49,7 @@ public class OrderItemService {
 
     public void returnOrderItemsToInventory(List<OrderItem> orderItems) {
         for (OrderItem orderItem : orderItems) {
-            returnProductQuantityToInventory(orderItem.getProduct(),orderItem.getQuantity());
+            returnProductQuantityToInventory(orderItem.getProduct(), orderItem.getQuantity());
         }
     }
 

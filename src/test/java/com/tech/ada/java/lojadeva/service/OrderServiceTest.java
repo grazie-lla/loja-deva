@@ -81,37 +81,74 @@ class OrderServiceTest {
 
     @Test
     public void generateOrderTest() {
-        OrderService orderService = spy(new OrderService(orderRepository, orderItemService,
-                shoppingBasketService, basketItemService));
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
+        Order expectedOrder = order;
 
         when(shoppingBasketService.findBasketById(orderRequest.getBasketId())).thenReturn(Optional.of(basket));
         when(orderService.isValidPaymentMethod(orderRequest.getPaymentMethod())).thenReturn(true);
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderRepository.save(any(Order.class))).thenReturn(expectedOrder);
         when(orderItemService.createOrderItemsFromBasketItems(any(Order.class), anyList())).thenReturn(orderItems);
         doNothing().when(orderService).emptyShoppingBasket(any(ShoppingBasket.class));
 
         Order actualOrder = orderService.generateOrder(orderRequest);
 
         verify(shoppingBasketService).findBasketById(orderRequest.getBasketId());
-        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(orderRepository, times(orderItems.size())).save(any(Order.class));
         verify(orderItemService).createOrderItemsFromBasketItems(any(Order.class), anyList());
         verify(orderService).emptyShoppingBasket(any(ShoppingBasket.class));
 
-        assertEquals(order.getClientId(), actualOrder.getClientId());
-        assertEquals(order.getOrderItems(), actualOrder.getOrderItems());
-        assertEquals(order.getTotal(), actualOrder.getTotal());
-        assertEquals(order.getPaymentMethod(), actualOrder.getPaymentMethod());
+        assertEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    public void generateOrderWhenBasketNotFoundTest() {
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
+        Long invalidBasketId = 123L;
+        OrderRequest invalidOrderRequest = new OrderRequest(invalidBasketId, "PIX");
+
+        when(shoppingBasketService.findBasketById(invalidOrderRequest.getBasketId()))
+                .thenThrow(new IllegalArgumentException("Carrinho não encontrado."));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.generateOrder(invalidOrderRequest));
+
+        assertEquals("Carrinho não encontrado.", exception.getMessage());
+        verify(shoppingBasketService).findBasketById(invalidOrderRequest.getBasketId());
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).createOrderItemsFromBasketItems(any(Order.class), anyList());
+        verify(orderService, never()).emptyShoppingBasket(any(ShoppingBasket.class));
+    }
+
+    @Test
+    public void generateOrderWhenInvalidPaymentMethodTest() {
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
+        OrderRequest invalidOrderRequest = new OrderRequest(basket.getId(), "INVALID_METHOD");
+
+        when(shoppingBasketService.findBasketById(invalidOrderRequest.getBasketId())).thenReturn(Optional.of(basket));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.generateOrder(invalidOrderRequest));
+
+        assertEquals("Método de pagamento inválido", exception.getMessage());
+        verify(shoppingBasketService).findBasketById(invalidOrderRequest.getBasketId());
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).createOrderItemsFromBasketItems(any(Order.class), anyList());
+        verify(orderService, never()).emptyShoppingBasket(any(ShoppingBasket.class));
     }
 
     @Test
     public void findAllOrdersTest() {
         List<Order> expectedOrders = orders;
+
         when(orderRepository.findAll()).thenReturn(expectedOrders);
 
         List<Order> actualOrders = orderService.findAllOrders();
 
         verify(orderRepository).findAll();
-        assertEquals(actualOrders.size(), 2);
+        assertEquals(expectedOrders.size(), actualOrders.size());
         assertEquals(expectedOrders, actualOrders);
     }
 
@@ -119,6 +156,7 @@ class OrderServiceTest {
     public void findOrderByIdTest() {
         Long id = 1L;
         Order expectedOrder = order;
+
         when(orderRepository.findById(id)).thenReturn(Optional.of(expectedOrder));
 
         Optional<Order> actualOrder = orderService.findOrderById(id);
@@ -131,6 +169,7 @@ class OrderServiceTest {
     @Test
     public void findOrderByIdNotFoundTest() {
         Long id = 1L;
+
         when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
         Optional<Order> actualOrder = orderService.findOrderById(id);
@@ -143,6 +182,7 @@ class OrderServiceTest {
     public void findOrdersByClientIdTest(){
         Long clientId = 1L;
         List<Order> expectedOrders = orders;
+
         when(orderRepository.findOrderByClientId(clientId)).thenReturn(expectedOrders);
 
         List<Order> actualOrders = orderService.findOrdersByClientId(clientId);
@@ -152,7 +192,7 @@ class OrderServiceTest {
     }
 
     @Test
-    public void updateOrderWhenNotCancelledTest() {
+    public void updateOrderTest() {
         Long id = 1L;
         Order expectedUpdatedOrder = order;
 
@@ -163,10 +203,26 @@ class OrderServiceTest {
 
         verify(orderRepository).findById(id);
         verify(orderRepository).save(any(Order.class));
-        verify(orderItemService, times(0))
-                .returnOrderItemsToInventory(actualUpdatedOrder.getBody().getOrderItems());
+        verify(orderItemService, never()).returnOrderItemsToInventory(anyList());
         assertEquals(HttpStatus.OK, actualUpdatedOrder.getStatusCode());
         assertEquals(expectedUpdatedOrder, actualUpdatedOrder.getBody());
+    }
+
+    @Test
+    public void updateOrderWhenAlreadyDeliveredTest() {
+        Long id = 1L;
+        Order deliveredOrder = order;
+        deliveredOrder.setStatus(Status.ENTREGUE);
+
+        when(orderRepository.findById(id)).thenReturn(Optional.of(deliveredOrder));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.updateOrder(id, updateOrderRequest));
+
+        assertEquals("Não é possível alterar o pedido.", exception.getMessage());
+        verify(orderRepository).findById(id);
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).returnOrderItemsToInventory(anyList());
     }
 
     @Test
@@ -190,6 +246,7 @@ class OrderServiceTest {
     @Test
     public void updateOrderWhenOrderNotFoundTest() {
         Long id = 1L;
+
         when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
         ResponseEntity<Order> result = orderService.updateOrder(id, new UpdateOrderRequest("ENVIADO"));
@@ -204,38 +261,41 @@ class OrderServiceTest {
     public void deleteOrderByIdTest() {
         Long id = 1L;
         Order orderToDelete = order;
+
         when(orderRepository.findById(id)).thenReturn(Optional.of(orderToDelete));
 
         assertTrue(orderService.deleteOrderById(id));
-
         verify(orderRepository).delete(orderToDelete);
     }
 
     @Test
     public void deleteOrderByIdWhenOrderNotFoundTest() {
         Long id = 1L;
+
         when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
         assertFalse(orderService.deleteOrderById(id));
-
         verify(orderRepository, never()).delete(any());
     }
 
     @Test
     public void isValidPaymentMethodWhenValidMethodTest() {
         boolean result = orderService.isValidPaymentMethod("PIX");
+
         assertTrue(result);
     }
 
     @Test
     public void isValidPaymentMethodCaseInsensitiveTest() {
         boolean result = orderService.isValidPaymentMethod("pix");
+
         assertTrue(result);
     }
 
     @Test
     public void isValidPaymentMethodWhenInvalidMethodTest() {
         boolean result = orderService.isValidPaymentMethod("PICPAY");
+
         assertFalse(result);
     }
 

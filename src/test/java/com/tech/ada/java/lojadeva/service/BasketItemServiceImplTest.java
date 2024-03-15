@@ -48,7 +48,6 @@ class BasketItemServiceImplTest {
 
     @BeforeEach
     void setUp() {
-// Initialize some sample objects for testing
         shoppingBasket = new ShoppingBasket();
 
         basketItem1 = new BasketItem();
