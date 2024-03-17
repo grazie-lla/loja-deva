@@ -42,6 +42,7 @@ public class ClientService {
 
         if (!existingClient.getCpf().equals(clientRequest.getCpf())) {
             validateClient(clientRequest);
+            throw new IllegalArgumentException("CPF fornecido é diferente do CPF existente");
         }
 
         existingClient.setName(clientRequest.getName());
@@ -52,11 +53,8 @@ public class ClientService {
         existingClient.setPhoneNumber(clientRequest.getPhoneNumber());
         existingClient.setPassword(clientRequest.getPassword());
 
-        if (!existingClient.equals((clientRequest))) {
-            return clientRepository.save(existingClient);
-        } else {
-            return existingClient;
-        }
+        return clientRepository.save(existingClient);
+
     }
 
     void validateClient(Client client) {
@@ -75,48 +73,61 @@ public class ClientService {
         Client existingClient = clientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado!"));
 
-        if (clientRequest.getName() != null) {
+
+        boolean hasChanges = false;
+
+        if (clientRequest.getName() != null && !clientRequest.getName().equals(existingClient.getName())) {
             existingClient.setName(clientRequest.getName());
+            hasChanges = true;
         }
-        if (clientRequest.getEmail() != null) {
+        if (clientRequest.getEmail() != null && !clientRequest.getEmail().equalsIgnoreCase(existingClient.getEmail())) {
             existingClient.setEmail(clientRequest.getEmail());
+            hasChanges = true;
         }
-        if (clientRequest.getCpf() != null) {
-            existingClient.setCpf(clientRequest.getCpf());
+        if (clientRequest.getCpf() != null && !clientRequest.getCpf().equals(existingClient.getCpf())) {
+            throw new IllegalArgumentException("O CPF não pode ser alterado.");
         }
-        if (clientRequest.getAddress() != null) {
+        if (clientRequest.getAddress() != null && !clientRequest.getAddress().equals(existingClient.getAddress())) {
             existingClient.setAddress(clientRequest.getAddress());
+            hasChanges = true;
         }
-        if (clientRequest.getPostalCode() != null) {
+        if (clientRequest.getPostalCode() != null && !clientRequest.getPostalCode().equals(existingClient.getPostalCode())) {
             existingClient.setPostalCode(clientRequest.getPostalCode());
+            hasChanges = true;
         }
-        if (clientRequest.getPhoneNumber() != null) {
+        if (clientRequest.getPhoneNumber() != null && !clientRequest.getPhoneNumber().equals(existingClient.getPhoneNumber())) {
             existingClient.setPhoneNumber(clientRequest.getPhoneNumber());
+            hasChanges = true;
         }
-        if (clientRequest.getPassword() != null) {
+        if (clientRequest.getPassword() != null && !clientRequest.getPassword().equals(existingClient.getPassword())) {
             existingClient.setPassword(clientRequest.getPassword());
+            hasChanges = true;
         }
 
-        return clientRepository.save(existingClient);
+        if (hasChanges) {
+            return clientRepository.save(existingClient);
+        } else {
+            return existingClient; // Retorna o cliente existente sem salvar se não houve alterações
 
+        }
+    }
+        public Client getClientById (Long id){
+            return clientRepository.findById(id).orElse(null);
+
+        }
+
+        public void deleteClient (Long id){
+
+            Client existingClient = clientRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+
+            clientRepository.delete(existingClient);
+        }
+
+        public List<Client> findAllClients () {
+            return clientRepository.findAll();
+        }
     }
 
-    public Client getClientById(Long id) {
-        return clientRepository.findById(id).orElse(null);
-
-    }
-
-    public void deleteClient(Long id) {
-
-        Client existingClient = clientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
-
-        clientRepository.delete(existingClient);
-    }
-
-    public List<Client> findAllClients() {
-        return clientRepository.findAll();
-    }
-    }
 
 

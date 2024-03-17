@@ -7,9 +7,13 @@ import com.tech.ada.java.lojadeva.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,12 +25,13 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
 
     @Mock
     private ClientRepository clientRepository;
+
+
     @Mock
     private ShoppingBasketService shoppingBasketService;
 
@@ -37,8 +42,6 @@ class ClientServiceTest {
     private List<Client> clients;
     private ShoppingBasket basket;
 
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private final Validator validator = factory.getValidator();
 
     @BeforeEach
     void setup() {
@@ -106,37 +109,42 @@ class ClientServiceTest {
     @Test
     void updateClientTest() {
 
-        // Mock data
         Long id = 1L;
         Client existingClient = new Client();
         existingClient.setId(id);
-        existingClient.setName("Existing Name");
-        existingClient.setEmail("existing@example.com");
+        existingClient.setName("Nathalya Lucena");
+        existingClient.setEmail("nathy@example.com");
         existingClient.setCpf("123.456.789-00");
-        // Add more fields as necessary
+        existingClient.setAddress("Nathy Address");
+        existingClient.setPostalCode("01234-567");
+        existingClient.setPhoneNumber("(98)12345-6789");
+        existingClient.setPassword("LojaDeva2024!");
 
         Client clientRequest = new Client();
-        clientRequest.setName("New Name");
-        clientRequest.setEmail("new@example.com");
-        clientRequest.setCpf("123.456.789-01");
-        // Add more fields as necessary
+        clientRequest.setName("Nathalya Lucena Vieira de Melo");
+        clientRequest.setEmail("nathy@example.com");
+        clientRequest.setCpf("123.456.789-00");
+        clientRequest.setAddress("Nathy New Address");
+        clientRequest.setPostalCode("01235-567");
+        clientRequest.setPhoneNumber("(11)12345-6789");
+        clientRequest.setPassword("LojaDeva2024*");
 
         when(clientRepository.findById(id)).thenReturn(java.util.Optional.of(existingClient));
         when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Call the method to test
         Client updatedClient = clientService.updateClient(id, clientRequest);
 
-        // Verify that the repository methods were called with the expected arguments
         verify(clientRepository).findById(id);
         verify(clientRepository).save(any(Client.class));
 
-        // Assertions
         assertEquals(id, updatedClient.getId());
         assertEquals(clientRequest.getName(), updatedClient.getName());
         assertEquals(clientRequest.getEmail(), updatedClient.getEmail());
         assertEquals(clientRequest.getCpf(), updatedClient.getCpf());
-        // Add more assertions for other fields as necessary
+        assertEquals(clientRequest.getAddress(), updatedClient.getAddress());
+        assertEquals(clientRequest.getPostalCode(), updatedClient.getPostalCode());
+        assertEquals(clientRequest.getPhoneNumber(), updatedClient.getPhoneNumber());
+        assertEquals(clientRequest.getPassword(), updatedClient.getPassword());
     }
 
     @Test
@@ -154,6 +162,7 @@ class ClientServiceTest {
 
         verify(clientRepository, never()).save(any(Client.class));
     }
+
     @Test
     public void testUpdateClient_CpfMismatch() {
 
@@ -167,23 +176,20 @@ class ClientServiceTest {
         existingClient.setEmail("nathy@example.com");
         existingClient.setCpf(existingCpf);
 
+        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
+
         Client clientRequest = new Client();
+        clientRequest.setId(existingClient.getId());
         clientRequest.setName("Nathalya Lucena Vieira de Melo");
         clientRequest.setEmail("nathy@example.com");
         clientRequest.setCpf(requestCpf);
 
-        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
 
-        Client updatedClient = clientService.updateClient(id, clientRequest);
+        assertThrows(IllegalArgumentException.class, () -> clientService.updateClient(existingClient.getId(), clientRequest));
 
-        verify(clientRepository).findById(id);
-
-        verify(clientRepository, never()).save(any(Client.class));
-
-        verify(clientService).validateClient(clientRequest);
-
-        assertEquals(existingClient, updatedClient);
+        verify(clientRepository, never()).save(any());
     }
+
     @Test
     void partialUpdateClientTest() {
 
@@ -202,7 +208,7 @@ class ClientServiceTest {
         ClientRequest clientRequest = new ClientRequest();
         clientRequest.setName("Nathalya Lucena Vieira de Melo");
         clientRequest.setEmail("nathy@example.com");
-        clientRequest.setCpf("123.456.789-01");
+        clientRequest.setCpf("123.456.789-00");
         clientRequest.setAddress("Nathy New Address");
         clientRequest.setPostalCode("01235-567");
         clientRequest.setPhoneNumber("(11)12345-6789");
@@ -227,6 +233,7 @@ class ClientServiceTest {
         assertEquals(clientRequest.getPassword(), updatedClient.getPassword());
 
     }
+
     @Test
     void partialUpdateClientNotFoundTest() {
 
@@ -237,6 +244,7 @@ class ClientServiceTest {
             clientService.partialUpdateClient(id, new ClientRequest());
         });
     }
+
     @Test
     public void testPartialUpdateClient_NoChanges() {
 
@@ -252,9 +260,15 @@ class ClientServiceTest {
         existingClient.setPassword("LojaDeva2024!");
 
         ClientRequest clientRequest = new ClientRequest();
+        clientRequest.setName("Nathalya Lucena");
+        clientRequest.setEmail("nathy@example.com");
+        clientRequest.setCpf("123.456.789-00");
+        clientRequest.setAddress("Nathy Address");
+        clientRequest.setPostalCode("01234-567");
+        clientRequest.setPhoneNumber("(98)12345-6789");
+        clientRequest.setPassword("LojaDeva2024!");
 
         when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
-
 
         Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
 
@@ -264,8 +278,9 @@ class ClientServiceTest {
 
         assertEquals(existingClient, updatedClient);
     }
+
     @Test
-    public void testUpdateClient_NoChanges() {
+    public void testPartialUpdateClient_NullPartial() {
 
         Long id = 1L;
         Client existingClient = new Client();
@@ -278,19 +293,77 @@ class ClientServiceTest {
         existingClient.setPhoneNumber("(98)12345-6789");
         existingClient.setPassword("LojaDeva2024!");
 
-        Client clientRequest = new Client();
-        clientRequest.setName("Nathalya Lucena");
-        clientRequest.setEmail("nathy@example.com");
+        ClientRequest clientRequest = new ClientRequest();
+        clientRequest.setEmail("nathy22@example.com");
         clientRequest.setCpf("123.456.789-00");
+        clientRequest.setPassword("LojaDeva2024!");
+
+        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
+
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
+
+        verify(clientRepository).findById(id);
+
+        verify(clientRepository, never()).save(existingClient);
+
+        assertEquals(existingClient, updatedClient);
+    }
+    @Test
+    public void testPartialUpdateClient_NullTotal() {
+
+        Long id = 1L;
+        Client existingClient = new Client();
+        existingClient.setId(id);
+        existingClient.setName("Nathalya Lucena");
+        existingClient.setEmail("nathy@example.com");
+        existingClient.setCpf("123.456.789-00");
+        existingClient.setAddress("Nathy Address");
+        existingClient.setPostalCode("01234-567");
+        existingClient.setPhoneNumber("(98)12345-6789");
+        existingClient.setPassword("LojaDeva2024!");
+
+        ClientRequest clientRequest = new ClientRequest();
+
+
+        when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
+
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
+
+        verify(clientRepository).findById(id);
+
+        verify(clientRepository, never()).save(existingClient);
+
+        assertEquals(existingClient, updatedClient);
+    }
+
+
+    @Test
+    public void testPartialUpdateClient_CPFException() {
+
+        Long id = 1L;
+        Client existingClient = new Client();
+        existingClient.setId(id);
+        existingClient.setName("Nathalya Lucena");
+        existingClient.setEmail("nathy@example.com");
+        existingClient.setCpf("123.456.789-00");
+        existingClient.setAddress("Nathy Address");
+        existingClient.setPostalCode("01234-567");
+        existingClient.setPhoneNumber("(98)12345-6789");
+        existingClient.setPassword("LojaDeva2024!");
+
+        ClientRequest clientRequest = new ClientRequest();
+        clientRequest.setId(existingClient.getId());
+        clientRequest.setName("Nathalya Lucena");
+        clientRequest.setEmail("nathy24@example.com");
+        clientRequest.setCpf("123.456.789-01");
         clientRequest.setAddress("Nathy Address");
         clientRequest.setPostalCode("01234-567");
         clientRequest.setPhoneNumber("(98)12345-6789");
         clientRequest.setPassword("LojaDeva2024!");
 
-        
         when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
 
-        Client updatedClient = clientService.updateClient(id, clientRequest);
+        Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
 
         verify(clientRepository).findById(id);
 
