@@ -211,16 +211,12 @@ class ClientServiceTest {
         when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
         when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Call the method to test
         Client updatedClient = clientService.partialUpdateClient(id, clientRequest);
 
-        // Verify that the repository method findById was called with the expected argument
         verify(clientRepository).findById(id);
 
-        // Verify that the repository method save was called with the updated client
         verify(clientRepository).save(existingClient);
 
-        // Assertions
         assertEquals(existingClient.getId(), updatedClient.getId());
         assertEquals(clientRequest.getName(), updatedClient.getName());
         assertEquals(clientRequest.getEmail(), updatedClient.getEmail());
@@ -270,7 +266,7 @@ class ClientServiceTest {
     }
     @Test
     public void testUpdateClient_NoChanges() {
-        // Mock data
+
         Long id = 1L;
         Client existingClient = new Client();
         existingClient.setId(id);
@@ -300,7 +296,6 @@ class ClientServiceTest {
 
         verify(clientRepository, never()).save(existingClient);
 
-        // Assertions
         assertEquals(existingClient, updatedClient);
     }
     @Test
