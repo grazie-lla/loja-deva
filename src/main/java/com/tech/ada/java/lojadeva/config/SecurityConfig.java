@@ -27,7 +27,7 @@ public class SecurityConfig {
         http.headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .csrf(AbstractHttpConfigurer::disable);
-               http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(publicPaths)
+                http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(publicPaths)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
