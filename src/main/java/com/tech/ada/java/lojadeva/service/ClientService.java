@@ -52,10 +52,14 @@ public class ClientService {
         existingClient.setPhoneNumber(clientRequest.getPhoneNumber());
         existingClient.setPassword(clientRequest.getPassword());
 
-        return clientRepository.save(existingClient);
+        if (!existingClient.equals((clientRequest))) {
+            return clientRepository.save(existingClient);
+        } else {
+            return existingClient;
+        }
     }
 
-    private void validateClient(Client client) {
+    void validateClient(Client client) {
 
         if (!Pattern.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", client.getCpf())) {
             throw new IllegalArgumentException("CPF Inválido!");
@@ -78,7 +82,7 @@ public class ClientService {
             existingClient.setEmail(clientRequest.getEmail());
         }
         if (clientRequest.getCpf() != null) {
-            existingClient.setCpf(clientRequest.getEmail());
+            existingClient.setCpf(clientRequest.getCpf());
         }
         if (clientRequest.getAddress() != null) {
             existingClient.setAddress(clientRequest.getAddress());
