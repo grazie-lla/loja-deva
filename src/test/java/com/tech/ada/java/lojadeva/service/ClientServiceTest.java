@@ -163,13 +163,13 @@ class ClientServiceTest {
 
         Client existingClient = new Client();
         existingClient.setId(id);
-        existingClient.setName("Existing Name");
-        existingClient.setEmail("existing@example.com");
+        existingClient.setName("Nathalya Lucena");
+        existingClient.setEmail("nathy@example.com");
         existingClient.setCpf(existingCpf);
 
         Client clientRequest = new Client();
-        clientRequest.setName("New Name");
-        clientRequest.setEmail("new@example.com");
+        clientRequest.setName("Nathalya Lucena Vieira de Melo");
+        clientRequest.setEmail("nathy@example.com");
         clientRequest.setCpf(requestCpf);
 
         when(clientRepository.findById(id)).thenReturn(Optional.of(existingClient));
