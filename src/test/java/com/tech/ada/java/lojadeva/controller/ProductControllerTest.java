@@ -113,14 +113,15 @@ class ProductControllerTest {
     @Test
     public void updateProductHttpTest() throws Exception {
         product.setId(1L);
+        product.setName("IPhone X");
 
         when(productService.updateProduct(Mockito.any(), Mockito.any(UpdateProductRequest.class)))
                 .thenReturn(ResponseEntity.of(Optional.of(product)));
 
         mockMvc.perform(MockMvcRequestBuilders.put("/product/{id}", 1).
                 contentType(MediaType.APPLICATION_JSON).
-                content(asJsonString(updateProductRequest)))
-                .andDo(MockMvcResultHandlers.print()).
+                content(asJsonString(updateProductRequest))).
+                andExpect(status().isOk()).
                 andExpect(jsonPath("$.id").value(1)).
                 andExpect(jsonPath("$.name", equalTo("IPhone X")));
     }
@@ -133,8 +134,7 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/product/{id}", 1).
                         contentType(MediaType.APPLICATION_JSON).
-                        content(asJsonString(updateProductDetailsRequest)))
-                        .andDo(MockMvcResultHandlers.print());
+                        content(asJsonString(updateProductDetailsRequest))).andExpect(status().isOk());
     }
 
     @Test

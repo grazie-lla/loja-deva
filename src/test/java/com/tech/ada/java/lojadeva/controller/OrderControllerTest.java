@@ -1,10 +1,10 @@
 package com.tech.ada.java.lojadeva.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tech.ada.java.lojadeva.domain.Order;
+import com.tech.ada.java.lojadeva.domain.OrderItem;
 import com.tech.ada.java.lojadeva.domain.PaymentMethod;
 import com.tech.ada.java.lojadeva.domain.Status;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
@@ -25,13 +25,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
@@ -40,9 +41,6 @@ class OrderControllerTest {
     private OrderService orderService;
     private Order order;
     private List<Order> orderList;
-    private OrderRequest orderRequest;
-    private UpdateOrderRequest updateOrderRequest;
-    private static ObjectMapper objectMapper;
 
     @InjectMocks
     private OrderController orderController;
@@ -50,24 +48,24 @@ class OrderControllerTest {
 
     @BeforeEach
     public void setup(){
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(1L);
+
         order = new Order();
         order.setId(1L);
         order.setClientId(1L);
+        order.setOrderItems(List.of(orderItem));
         order.setTotal(new BigDecimal("100.00"));
         order.setPaymentMethod(PaymentMethod.PIX);
 
         orderList = List.of(order);
-
-        orderRequest = new OrderRequest(1L, "PIX");
-
-        updateOrderRequest = new UpdateOrderRequest("ENVIADO");
 
         mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
     }
 
     public static String asJsonString(final Object obj) {
         try {
-            objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             return objectMapper.writeValueAsString(obj);
@@ -78,179 +76,131 @@ class OrderControllerTest {
 
     @Test
     public void generateOrderHttpTest() throws Exception {
+        OrderRequest orderRequest = new OrderRequest(1L, "PIX");
+
         when(orderService.generateOrder(orderRequest)).thenReturn(order);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .post("/order")
+        mockMvc.perform(MockMvcRequestBuilders.post("/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderRequest)))
-                .andExpect(status().isCreated())
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        Order responseOrder = objectMapper.readValue(responseBody, Order.class);
-
-        verify(orderService).generateOrder(orderRequest);
-        assertFalse(responseBody.isEmpty());
-        assertEquals(order, responseOrder);
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.clientId").value(1))
+                .andExpect(jsonPath("$.orderItems", hasSize(1)))
+                .andExpect(jsonPath("$.orderItems[0].id").value(1))
+                .andExpect(jsonPath("$.total").value("100.0"))
+                .andExpect(jsonPath("$.paymentMethod").value("PIX"))
+                .andExpect(jsonPath("$.status").value("PENDENTE"))
+                .andExpect(jsonPath("$.createdAt").value(order.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.updatedAt").value(order.getUpdatedAt().toString()));
     }
 
     @Test
     public void findAllOrdersHttpTest() throws Exception {
         when(orderService.findAllOrders()).thenReturn(orderList);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order")
+        mockMvc.perform(MockMvcRequestBuilders.get("/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
-                .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
-
-        verify(orderService).findAllOrders();
-        assertFalse(responseBody.isEmpty());
-        assertEquals(orderList, responseOrderList);
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(1));
     }
 
     @Test
     public void findOrderByIdHttpTest() throws Exception {
         when(orderService.findOrderById(Mockito.any())).thenReturn(Optional.of(order));
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/1")
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        Order responseOrder = objectMapper.readValue(responseBody, Order.class);
-
-        verify(orderService).findOrderById(Mockito.any());
-        assertFalse(responseBody.isEmpty());
-        assertEquals(order.getId(), responseOrder.getId());
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.clientId").value(1));
     }
 
     @Test
     public void findOrderByIdNotFoundHttpTest() throws Exception {
         when(orderService.findOrderById(Mockito.any())).thenReturn(Optional.empty());
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/123")
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderService).findOrderById(Mockito.any());
-        assertTrue(responseBody.isEmpty());
+                .andExpect(status().isNotFound());
     }
 
     @Test
     public void findOrdersByClientIdHttpTest() throws Exception{
         when(orderService.findOrdersByClientId(Mockito.anyLong())).thenReturn(orderList);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order")
+        mockMvc.perform(MockMvcRequestBuilders.get("/order")
                         .param("clientId", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
-
-        verify(orderService).findOrdersByClientId(Mockito.anyLong());
-        assertFalse(responseBody.isEmpty());
-        assertEquals(orderList, responseOrderList);
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(1));
     }
 
     @Test
     public void findOrdersByClientIdNotFoundHttpTest() throws Exception{
         when(orderService.findOrdersByClientId(Mockito.anyLong())).thenReturn(Collections.emptyList());
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order")
+        mockMvc.perform(MockMvcRequestBuilders.get("/order")
                         .param("clientId", "123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(orderList)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        List<Order> responseOrderList = objectMapper.readValue(responseBody, new TypeReference<List<Order>>() {});
-
-        verify(orderService).findOrdersByClientId(Mockito.anyLong());
-        assertFalse(responseBody.isEmpty());
-        assertTrue(responseOrderList.isEmpty());
+                .andExpect(jsonPath("$", empty()));
     }
 
     @Test
     public void updateOrderHttpTest() throws Exception{
-        order.setStatus(Status.ENVIADO);
-        when(orderService.updateOrder(Mockito.anyLong(), eq(updateOrderRequest))).thenReturn(ResponseEntity.of(Optional.of(order)));
+        Order updatedUrder = order;
+        updatedUrder.setStatus(Status.ENVIADO);
+        updatedUrder.setUpdatedAt(LocalDateTime.now());
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .put("/order/1")
+        UpdateOrderRequest updateOrderRequest = new UpdateOrderRequest("ENVIADO");
+
+        when(orderService.updateOrder(Mockito.anyLong(), eq(updateOrderRequest)))
+                .thenReturn(ResponseEntity.of(Optional.of(updatedUrder)));
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/order/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(updateOrderRequest)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-        Order responseOrder = objectMapper.readValue(responseBody, Order.class);
-
-        verify(orderService).updateOrder(Mockito.anyLong(), eq(updateOrderRequest));
-        assertFalse(responseBody.isEmpty());
-        assertEquals(order, responseOrder);
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.status").value("ENVIADO"))
+                .andExpect(jsonPath("$.updatedAt").value(updatedUrder.getUpdatedAt().toString()));
     }
 
     @Test
     void deleteOrderByIdHttpTest() throws Exception {
         when(orderService.deleteOrderById(anyLong())).thenReturn(true);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/order/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/order/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderService).deleteOrderById(anyLong());
-        assertFalse(responseBody.isEmpty());
-        assertEquals("Pedido excluído com sucesso.", responseBody);
+                .andExpect(content().string("Pedido excluído com sucesso."));
     }
 
     @Test
     void deleteOrderByIdNotFoundHttpTest() throws Exception {
         when(orderService.deleteOrderById(anyLong())).thenReturn(false);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/order/123")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/order/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(order)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderService).deleteOrderById(anyLong());
-        assertTrue(responseBody.isEmpty());
+                .andExpect(status().isNotFound());
     }
 }

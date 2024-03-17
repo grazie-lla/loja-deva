@@ -81,9 +81,9 @@ class OrderServiceTest {
 
     @Test
     public void generateOrderTest() {
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
         Order expectedOrder = order;
-        OrderService orderService = spy(new OrderService(orderRepository, orderItemService,
-                shoppingBasketService, basketItemService));
 
         when(shoppingBasketService.findBasketById(orderRequest.getBasketId())).thenReturn(Optional.of(basket));
         when(orderService.isValidPaymentMethod(orderRequest.getPaymentMethod())).thenReturn(true);
@@ -94,11 +94,49 @@ class OrderServiceTest {
         Order actualOrder = orderService.generateOrder(orderRequest);
 
         verify(shoppingBasketService).findBasketById(orderRequest.getBasketId());
-        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(orderRepository, times(orderItems.size())).save(any(Order.class));
         verify(orderItemService).createOrderItemsFromBasketItems(any(Order.class), anyList());
         verify(orderService).emptyShoppingBasket(any(ShoppingBasket.class));
 
         assertEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    public void generateOrderWhenBasketNotFoundTest() {
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
+        Long invalidBasketId = 123L;
+        OrderRequest invalidOrderRequest = new OrderRequest(invalidBasketId, "PIX");
+
+        when(shoppingBasketService.findBasketById(invalidOrderRequest.getBasketId()))
+                .thenThrow(new IllegalArgumentException("Carrinho não encontrado."));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.generateOrder(invalidOrderRequest));
+
+        assertEquals("Carrinho não encontrado.", exception.getMessage());
+        verify(shoppingBasketService).findBasketById(invalidOrderRequest.getBasketId());
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).createOrderItemsFromBasketItems(any(Order.class), anyList());
+        verify(orderService, never()).emptyShoppingBasket(any(ShoppingBasket.class));
+    }
+
+    @Test
+    public void generateOrderWhenInvalidPaymentMethodTest() {
+        OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,
+                basketItemService));
+        OrderRequest invalidOrderRequest = new OrderRequest(basket.getId(), "INVALID_METHOD");
+
+        when(shoppingBasketService.findBasketById(invalidOrderRequest.getBasketId())).thenReturn(Optional.of(basket));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.generateOrder(invalidOrderRequest));
+
+        assertEquals("Método de pagamento inválido", exception.getMessage());
+        verify(shoppingBasketService).findBasketById(invalidOrderRequest.getBasketId());
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).createOrderItemsFromBasketItems(any(Order.class), anyList());
+        verify(orderService, never()).emptyShoppingBasket(any(ShoppingBasket.class));
     }
 
     @Test
@@ -154,7 +192,7 @@ class OrderServiceTest {
     }
 
     @Test
-    public void updateOrderWhenNotCancelledTest() {
+    public void updateOrderTest() {
         Long id = 1L;
         Order expectedUpdatedOrder = order;
 
@@ -168,6 +206,23 @@ class OrderServiceTest {
         verify(orderItemService, never()).returnOrderItemsToInventory(anyList());
         assertEquals(HttpStatus.OK, actualUpdatedOrder.getStatusCode());
         assertEquals(expectedUpdatedOrder, actualUpdatedOrder.getBody());
+    }
+
+    @Test
+    public void updateOrderWhenAlreadyDeliveredTest() {
+        Long id = 1L;
+        Order deliveredOrder = order;
+        deliveredOrder.setStatus(Status.ENTREGUE);
+
+        when(orderRepository.findById(id)).thenReturn(Optional.of(deliveredOrder));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> orderService.updateOrder(id, updateOrderRequest));
+
+        assertEquals("Não é possível alterar o pedido.", exception.getMessage());
+        verify(orderRepository).findById(id);
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(orderItemService, never()).returnOrderItemsToInventory(anyList());
     }
 
     @Test
@@ -191,6 +246,7 @@ class OrderServiceTest {
     @Test
     public void updateOrderWhenOrderNotFoundTest() {
         Long id = 1L;
+
         when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
         ResponseEntity<Order> result = orderService.updateOrder(id, new UpdateOrderRequest("ENVIADO"));
@@ -205,6 +261,7 @@ class OrderServiceTest {
     public void deleteOrderByIdTest() {
         Long id = 1L;
         Order orderToDelete = order;
+
         when(orderRepository.findById(id)).thenReturn(Optional.of(orderToDelete));
 
         assertTrue(orderService.deleteOrderById(id));
@@ -214,6 +271,7 @@ class OrderServiceTest {
     @Test
     public void deleteOrderByIdWhenOrderNotFoundTest() {
         Long id = 1L;
+
         when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
         assertFalse(orderService.deleteOrderById(id));

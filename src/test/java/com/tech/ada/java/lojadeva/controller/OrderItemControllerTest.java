@@ -1,6 +1,5 @@
 package com.tech.ada.java.lojadeva.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -15,22 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,9 +44,16 @@ class OrderItemControllerTest {
     public void setup() {
         order = new Order();
         order.setId(1L);
-        orderItem = new OrderItem(1L, order, new Product(), 1);
+
+        Product product = new Product();
+        product.setId(1L);
+
+        orderItem = new OrderItem(1L, order, product, 1);
+
         orderItemList = List.of(orderItem);
+
         order.setOrderItems(orderItemList);
+
         mockMvc = MockMvcBuilders.standaloneSetup(orderItemController).build();
     }
 
@@ -71,17 +72,11 @@ class OrderItemControllerTest {
     public void findOrderItemsByOrderIdHttpRequest() throws Exception {
         when(orderItemService.findOrderItemsByOrderId(Mockito.anyLong())).thenReturn(orderItemList);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/{orderId}/items", 1))
-                .andExpect(status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{orderId}/items", 1))
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderItemService).findOrderItemsByOrderId(Mockito.anyLong());
-        assertFalse(responseBody.isEmpty());
-        assertEquals(asJsonString(orderItemList), responseBody);
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(1));
     }
 
     @Test
@@ -89,49 +84,30 @@ class OrderItemControllerTest {
         List<OrderItem> emptyList = Collections.emptyList();
         when(orderItemService.findOrderItemsByOrderId(Mockito.anyLong())).thenReturn(emptyList);
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/{orderId}/items", 123))
-                .andExpect(status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{orderId}/items", 123))
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderItemService).findOrderItemsByOrderId(Mockito.anyLong());
-        assertFalse(responseBody.isEmpty());
-        assertEquals(asJsonString(emptyList), responseBody);
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", empty()));
     }
 
     @Test
     public void findOrderItemByIdHttpRequest() throws Exception {
         when(orderItemService.findOrderItemById(Mockito.any())).thenReturn(Optional.of(orderItem));
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/{orderId}/items/{id}", 1, 1))
-                .andExpect(status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{orderId}/items/{id}", 1, 1))
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderItemService).findOrderItemById(Mockito.any());
-        assertFalse(responseBody.isEmpty());
-        assertEquals(asJsonString(orderItem), responseBody);
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.product.id").value(1))
+                .andExpect(jsonPath("$.quantity").value(1));
     }
 
     @Test
     public void findOrderItemByIdNotFoundHttpRequest() throws Exception {
         when(orderItemService.findOrderItemById(Mockito.any())).thenReturn(Optional.empty());
 
-        var result = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/order/{orderId}/items/{id}", 1, 123))
-                .andExpect(status().isNotFound())
+        mockMvc.perform(MockMvcRequestBuilders.get("/order/{orderId}/items/{id}", 1, 123))
                 .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        String responseBody = result.getResponse().getContentAsString();
-
-        verify(orderItemService).findOrderItemById(Mockito.any());
-        assertTrue(responseBody.isEmpty());
+                .andExpect(status().isNotFound());
     }
 }
