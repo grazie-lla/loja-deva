@@ -1,6 +1,7 @@
 package com.tech.ada.java.lojadeva.service;
 
 import com.tech.ada.java.lojadeva.domain.*;
+import com.tech.ada.java.lojadeva.dto.ClientRequest;
 import com.tech.ada.java.lojadeva.dto.OrderRequest;
 import com.tech.ada.java.lojadeva.dto.UpdateOrderRequest;
 import com.tech.ada.java.lojadeva.repository.OrderRepository;
@@ -100,7 +101,17 @@ class OrderServiceTest {
 
         assertEquals(expectedOrder, actualOrder);
     }
+    @Test
+    void orderExceptionNotBasket() {
+        Long basketId = 1L;
 
+        when(shoppingBasketService.findBasketById(basketId)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            orderService.generateOrder(new OrderRequest(basketId, "PIX"));
+        });
+        assertEquals("Carrinho não encontrado.", exception.getMessage());
+    }
     @Test
     public void generateOrderWhenBasketNotFoundTest() {
         OrderService orderService = spy(new OrderService(orderRepository, orderItemService, shoppingBasketService,

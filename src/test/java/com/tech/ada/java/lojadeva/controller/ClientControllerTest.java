@@ -73,7 +73,16 @@ class ClientControllerTest {
 
         verify(clientService, times(1)).getClientById(Mockito.any());
     }
+    @Test
+    public void getClientByIdNotFoundHttpRequest() throws Exception {
+        when(clientService.getClientById(1L)).thenReturn(null);
 
+        mockMvc.perform(MockMvcRequestBuilders.get("/clients/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(clientService, times(1)).getClientById(1L);
+    }
     @Test
     public void updateClientHttpTest() throws Exception {
         when(clientService.updateClient(Mockito.any(), Mockito.any(Client.class)))
